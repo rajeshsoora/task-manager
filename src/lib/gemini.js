@@ -10,9 +10,9 @@ const genAI = new GoogleGenerativeAI(API_KEY || "");
 
 /**
  * Builds a system instruction string from current app state.
- * This tells Gemini who it is and what context it's operating in.
+ * Optionally enriched with user profile data for personalized coaching.
  */
-export function buildSystemPrompt({ activeTask, currentMood, energy, recentEvents }) {
+export function buildSystemPrompt({ activeTask, currentMood, energy, recentEvents, profile }) {
   const taskSection = activeTask
     ? `The user is currently focused on: "${activeTask.title}" (category: ${activeTask.kind}, energy required: ${activeTask.energy}/5).`
     : "The user has no active task at the moment.";
@@ -30,13 +30,39 @@ export function buildSystemPrompt({ activeTask, currentMood, energy, recentEvent
           .join("\n")
       : "No recent activity logged.";
 
+  let profileSection = "";
+  if (profile?.traits && profile.traits.onboardingComplete) {
+    const { traits, patterns, context } = profile;
+    const keyTraits = [
+      traits.selfEfficacy?.score < 45     ? `low self-efficacy (${traits.selfEfficacy.score}/100) — tends to doubt ability mid-task` : null,
+      traits.perfectionism?.score > 65    ? `high perfectionism (${traits.perfectionism.score}/100) — risk of over-refinement, avoiding submission` : null,
+      traits.emotionalRegulation?.score < 45 ? `low emotional regulation (${traits.emotionalRegulation.score}/100) — task friction triggers avoidance` : null,
+      traits.impulsivity?.score > 65      ? `high impulsivity (${traits.impulsivity.score}/100) — susceptible to distraction` : null,
+      traits.timePerspective?.score < 45  ? `time discounting (${traits.timePerspective.score}/100) — underestimates task duration` : null,
+    ].filter(Boolean);
+
+    const patternNote = patterns
+      ? [
+          patterns.avoidanceKind && activeTask?.kind === patterns.avoidanceKind
+            ? `This task kind (${patterns.avoidanceKind}) is historically most-avoided.` : null,
+          patterns.peakEnergyKind && activeTask?.kind === patterns.peakEnergyKind
+            ? `This task kind (${patterns.peakEnergyKind}) is where the user is strongest.` : null,
+        ].filter(Boolean).join(" ")
+      : "";
+
+    if (keyTraits.length > 0 || context?.narrative || patternNote) {
+      profileSection = `\nUser profile context:
+${keyTraits.map(t => `- ${t}`).join("\n")}${patternNote ? `\n- ${patternNote}` : ""}${context?.narrative ? `\nCoach note: ${context.narrative.slice(0, 200)}` : ""}`;
+    }
+  }
+
   return `You are Mind Coach, a calm and focused cognitive productivity assistant embedded in a personal task manager called Mind Manager.
 
 Your role is to help the user stay focused, work through friction, and reflect on their work. You have access to their current context:
 
 ${taskSection}
 ${moodSection}
-${eventsSection}
+${eventsSection}${profileSection}
 
 Guidelines:
 - Keep responses short (2-4 sentences). This is a chat interface, not an essay.
@@ -44,6 +70,7 @@ Guidelines:
 - If the user is stuck, help them find the smallest next action.
 - If they're tired or distracted, validate and suggest a break or task switch.
 - If they've made progress, acknowledge it briefly and keep momentum going.
+- If profile data is present, use it to personalize your tone — high perfectionism users need permission to move on; low self-efficacy users need confidence and small wins.
 - Do not make up information about tasks not provided to you.`;
 }
 
