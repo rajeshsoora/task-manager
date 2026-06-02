@@ -11,6 +11,7 @@ const TimelineView = lazy(() => import("./views/TimelineView"));
 
 // Modals
 import NewTaskModal from "./components/NewTaskModal";
+import AuthGate from "./components/AuthGate";
 
 // Web Audio API Synthesized Premium Chime
 function playRewardChime() {
@@ -415,7 +416,7 @@ function AppLayout() {
   const { user, signIn, signOut } = useAuth();
   const { tasks, activeTaskId, currentMood, lastCheckInAt, tweaks, setTweak, apiFetch } = useAppData();
   
-  const [view, setView] = useState(() => localStorage.getItem("mindView") || "now");
+  const [view, setView] = useState("now");
   const [filter, setFilter] = useState("open");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [newTaskOpen, setNewTaskOpen] = useState(false);
@@ -433,10 +434,8 @@ function AppLayout() {
     return () => window.removeEventListener("resize", handler);
   }, []);
 
-  // Save current view
   const handleViewChange = (v) => {
     setView(v);
-    localStorage.setItem("mindView", v);
   };
 
   // Check if check-in needed (if different day). The ref prevents StrictMode
@@ -771,7 +770,9 @@ function MoodCheckInModal({ open, currentMood, onClose }) {
 export default function App() {
   return (
     <AppDataProvider>
-      <AppLayout />
+      <AuthGate>
+        <AppLayout />
+      </AuthGate>
     </AppDataProvider>
   );
 }
