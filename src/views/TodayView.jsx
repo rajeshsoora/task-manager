@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useAppData, useDailyPlan, formatDate, getYesterdayDate } from "../context/AppContext";
 
 export default function TodayView({ onSetActive }) {
-  const { tasks, dailyPlans, apiFetch, activeTaskId } = useAppData();
+  const { tasks, dailyPlans, apiFetch, activeTaskId, events } = useAppData();
   
   const todayStr = formatDate(new Date());
   const { plan, loading } = useDailyPlan(todayStr);
@@ -50,6 +50,36 @@ export default function TodayView({ onSetActive }) {
   const completedTodayCount = useMemo(() => {
     return plannedTasks.filter((t) => t.done || t.lastTouched?.slice(0, 10) === todayStr).length;
   }, [plannedTasks, todayStr]);
+
+  const isMonday = new Date().getDay() === 1;
+  const lastWeekStats = useMemo(() => {
+    if (!isMonday) return null;
+    const now = new Date();
+    // Last Sunday = yesterday when today is Monday
+    const lastSun = new Date(now);
+    lastSun.setDate(now.getDate() - 1);
+    lastSun.setHours(23, 59, 59, 999);
+    // Last Monday = 6 days before last Sunday
+    const lastMon = new Date(lastSun);
+    lastMon.setDate(lastSun.getDate() - 6);
+    lastMon.setHours(0, 0, 0, 0);
+    const lastMonStr = lastMon.toISOString().slice(0, 10);
+    const lastSunStr = lastSun.toISOString().slice(0, 10);
+    const completed = tasks.filter(
+      (t) =>
+        t.done &&
+        t.lastTouched &&
+        t.lastTouched.slice(0, 10) >= lastMonStr &&
+        t.lastTouched.slice(0, 10) <= lastSunStr
+    ).length;
+    const touched = tasks.filter(
+      (t) =>
+        t.lastTouched &&
+        t.lastTouched.slice(0, 10) >= lastMonStr &&
+        t.lastTouched.slice(0, 10) <= lastSunStr
+    ).length;
+    return { completed, touched };
+  }, [tasks, isMonday]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -226,6 +256,18 @@ export default function TodayView({ onSetActive }) {
           onDrop={handleDrop}
           style={{ border: "1px dashed transparent", minHeight: 200 }}
         >
+          {lastWeekStats && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: '#22221a', border: '1px solid #44440a',
+              padding: '5px 12px', borderRadius: 20, marginBottom: 12
+            }}>
+              <span style={{ color: '#ffd700', fontSize: 12 }}>↩</span>
+              <span style={{ color: 'rgba(255,215,0,0.6)', fontSize: 11 }}>
+                Last week: <strong style={{ color: '#ffd700' }}>{lastWeekStats.completed}/{lastWeekStats.touched}</strong> completed
+              </span>
+            </div>
+          )}
           <div className="h-eyebrow" style={{ marginBottom: 12 }}>Planned · {plannedTasks.length}</div>
           
           {displayPlannedTasks.length === 0 ? (
