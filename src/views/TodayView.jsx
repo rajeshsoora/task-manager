@@ -281,7 +281,7 @@ export default function TodayView({ onSetActive }) {
                         {[1,2,3,4,5].map(i => (
                           <span key={i} style={{
                             width: 5, height: 5, borderRadius: '50%',
-                            background: i <= t.energy ? 'var(--accent)' : '#333'
+                            background: i <= t.energy ? 'var(--accent)' : 'var(--line-soft)'
                           }} />
                         ))}
                       </span>
