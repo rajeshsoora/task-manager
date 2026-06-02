@@ -62,6 +62,12 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
     return filteredTasks.slice(start, start + PAGE_SIZE);
   }, [filteredTasks, activePage]);
 
+  // Only show Anytime section (and exclude undated tasks from quad groups) when
+  // at least one task has a scheduled or due date — smooth for existing users
+  const hasSomeScheduled = useMemo(() =>
+    pageTasks.some(t => t.scheduledDate || t.dueDate)
+  , [pageTasks]);
+
   // Group tasks on this page by Eisenhower quadrant
   const groupedTasks = useMemo(() => {
     const groups = { q1: [], q2: [], q3: [], q4: [] };
@@ -77,12 +83,6 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
   const anytimeTasks = useMemo(() => {
     return pageTasks.filter(t => !t.scheduledDate && !t.dueDate);
   }, [pageTasks]);
-
-  // Only show Anytime section (and exclude undated tasks from quad groups) when
-  // at least one task has a scheduled or due date — smooth for existing users
-  const hasSomeScheduled = useMemo(() =>
-    pageTasks.some(t => t.scheduledDate || t.dueDate)
-  , [pageTasks]);
 
   // Pre-calculate counts for each filter pill
   const pillCounts = useMemo(() => {
