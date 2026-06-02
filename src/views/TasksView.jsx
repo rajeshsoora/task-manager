@@ -66,16 +66,23 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
   const groupedTasks = useMemo(() => {
     const groups = { q1: [], q2: [], q3: [], q4: [] };
     pageTasks.forEach((t) => {
+      if (hasSomeScheduled && !t.scheduledDate && !t.dueDate) return;
       const q = t.quad && groups[t.quad] ? t.quad : "q2";
       groups[q].push(t);
     });
     return groups;
-  }, [pageTasks]);
+  }, [pageTasks, hasSomeScheduled]);
 
   // Tasks with no scheduledDate and no dueDate (independent of quad grouping)
   const anytimeTasks = useMemo(() => {
     return pageTasks.filter(t => !t.scheduledDate && !t.dueDate);
   }, [pageTasks]);
+
+  // Only show Anytime section (and exclude undated tasks from quad groups) when
+  // at least one task has a scheduled or due date — smooth for existing users
+  const hasSomeScheduled = useMemo(() =>
+    pageTasks.some(t => t.scheduledDate || t.dueDate)
+  , [pageTasks]);
 
   // Pre-calculate counts for each filter pill
   const pillCounts = useMemo(() => {
@@ -345,7 +352,7 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
       })}
 
       {/* Anytime — no date set */}
-      {anytimeTasks.length > 0 && (
+      {hasSomeScheduled && anytimeTasks.length > 0 && (
         <div className="task-group" style={{ marginBottom: 20 }}>
           <div className="task-group-label" style={{
             display: "flex",

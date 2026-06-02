@@ -230,6 +230,7 @@ export default function TodayView({ onSetActive }) {
     month: "short",
     day: "numeric",
   });
+  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
   return (
     <div>
@@ -281,12 +282,12 @@ export default function TodayView({ onSetActive }) {
           {lastWeekStats && (
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: '#22221a', border: '1px solid #44440a',
+              background: 'var(--panel-2)', border: '1px solid var(--line)',
               padding: '5px 12px', borderRadius: 20, marginBottom: 12
             }}>
-              <span style={{ color: '#ffd700', fontSize: 12 }}>↩</span>
-              <span style={{ color: 'rgba(255,215,0,0.6)', fontSize: 11 }}>
-                Last week: <strong style={{ color: '#ffd700' }}>{lastWeekStats.completed}/{lastWeekStats.touched}</strong> completed
+              <span style={{ color: 'var(--accent)', fontSize: 12 }}>↩</span>
+              <span style={{ color: 'var(--ink-2)', fontSize: 11 }}>
+                Last week: <strong style={{ color: 'var(--accent)' }}>{lastWeekStats.completed}/{lastWeekStats.touched}</strong> completed
               </span>
             </div>
           )}
@@ -367,7 +368,7 @@ export default function TodayView({ onSetActive }) {
                               <input
                                 type="date"
                                 autoFocus
-                                min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().slice(0, 10)}
+                                min={tomorrowStr}
                                 style={{ fontSize: 11, width: 120, padding: '2px 4px', background: 'var(--panel-2)', border: '1px solid var(--line)', borderRadius: 4, color: 'var(--ink)' }}
                                 onChange={(e) => handleReschedule(t.id, e.target.value)}
                                 onBlur={() => setReschedulingId(null)}
