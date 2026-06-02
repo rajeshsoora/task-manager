@@ -41,6 +41,8 @@ function docToTask(id, data) {
     createdAt: data.createdAt,
     lastTouched: data.lastTouched,
     template: data.template || null,
+    scheduledDate: data.scheduledDate ?? null,
+    dueDate: data.dueDate ?? null,
   };
   if (data.template && data.templateData) {
     task[data.template] = data.templateData;
@@ -61,6 +63,8 @@ function taskToDoc(task) {
     lastTouched: task.lastTouched,
     template: task.template || null,
     templateData: task.template ? (task[task.template] || null) : null,
+    scheduledDate: task.scheduledDate ?? null,
+    dueDate: task.dueDate ?? null,
   };
 }
 
@@ -434,6 +438,8 @@ export function AppDataProvider({ children }) {
           lastTouched: now,
           template: action.task.template || null,
           templateData: action.task.template ? (action.task[action.task.template] || null) : null,
+          scheduledDate: action.task.scheduledDate ?? null,
+          dueDate: action.task.dueDate ?? null,
         };
         const ref = await addDoc(collection(db, "users", uid, "tasks"), newDoc);
         setTasks(prev => [...prev, docToTask(ref.id, newDoc)]);
