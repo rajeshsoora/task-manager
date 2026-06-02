@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAppData, useDailyPlan } from "../context/AppContext";
 import { sendMessage } from "../lib/gemini.js";
+import SubtaskPreviewModal from "../components/SubtaskPreviewModal";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
@@ -49,6 +50,8 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
   const [chatLogs, setChatLogs] = useState([COACH_GREETING]);
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef(null);
+
+  const [showSubtaskPreview, setShowSubtaskPreview] = useState(false);
 
   // Switch Task Modal States
   const [pendingActiveId, setPendingActiveId] = useState(null);
@@ -294,7 +297,22 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
           <button className="btn btn-sm btn-ghost" onClick={() => onEdit(activeTask)}>Edit details</button>
         </div>
         <h1 className="h-display serif" style={{ margin: "4px 0 12px" }}>{activeTask.title}</h1>
-        
+
+        {/* Generate subtasks nudge — only when task has no subtasks */}
+        {activeTask.template !== "idle" &&
+          !(activeTask.template === "project" && (activeTask.project?.phases || []).length > 0) &&
+          !(activeTask.template === "book"    && (activeTask.book?.chapters || []).length > 0) &&
+          !(activeTask.template === "skill"   && (activeTask.skill?.drills || []).length > 0) && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            style={{ fontSize: 11, marginBottom: 8 }}
+            onClick={() => setShowSubtaskPreview(true)}
+          >
+            ✦ Generate subtasks
+          </button>
+        )}
+
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-primary btn-sm" onClick={() => apiFetch("/actions", { method: "POST", body: { action: { type: "complete", taskId: activeTask.id } } })}>
             ✓ Mark Complete
@@ -359,6 +377,12 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
             </button>
           </form>
         </div>
+      )}
+      {showSubtaskPreview && activeTask && (
+        <SubtaskPreviewModal
+          task={activeTask}
+          onClose={() => setShowSubtaskPreview(false)}
+        />
       )}
     </div>
   );
