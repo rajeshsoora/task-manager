@@ -248,8 +248,7 @@ export default function TodayView({ onSetActive }) {
                     onDragEnd={handleDragEnd}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: 10,
+                      flexDirection: "column",
                       padding: "10px 12px",
                       border: active ? "1.5px solid var(--accent)" : "1px solid var(--line)",
                       borderRadius: 8,
@@ -258,49 +257,68 @@ export default function TodayView({ onSetActive }) {
                       cursor: "grab",
                     }}
                   >
-                    {/* Drag indicator handle */}
-                    <span style={{ color: "var(--faint)", cursor: "grab", userSelect: "none" }}>⋮⋮</span>
-                    <span style={{ fontSize: 11, color: "var(--faint)", width: 14 }}>
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-
-                    <span
-                      style={{
-                        flex: 1,
-                        fontSize: 14,
-                        textDecoration: completed ? "line-through" : "none",
-                        color: completed ? "var(--muted)" : "var(--ink)",
-                      }}
-                    >
-                      {t.title}
-                      {t.template && <span className="task-template-pill" style={{ marginLeft: 6 }}>{t.template}</span>}
-                    </span>
-
-                    {t.energy !== undefined && (
-                      <span style={{ display: 'flex', gap: 2 }} title={`Energy: ${t.energy}/5`}>
-                        {[1,2,3,4,5].map(i => (
-                          <span key={i} style={{
-                            width: 5, height: 5, borderRadius: '50%',
-                            background: i <= t.energy ? 'var(--accent)' : 'var(--line-soft)'
-                          }} />
-                        ))}
+                    {/* Main row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      {/* Drag indicator handle */}
+                      <span style={{ color: "var(--faint)", cursor: "grab", userSelect: "none" }}>⋮⋮</span>
+                      <span style={{ fontSize: 11, color: "var(--faint)", width: 14 }}>
+                        {String(idx + 1).padStart(2, "0")}
                       </span>
-                    )}
 
-                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                      {!completed && (
-                        <button className="btn btn-sm btn-ghost" onClick={() => onSetActive(t.id)}>
-                          Start
-                        </button>
-                      )}
-                      <button
-                        className="modal-close"
-                        style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--faint)" }}
-                        onClick={() => handleRemoveTask(t.id)}
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: 14,
+                          textDecoration: completed ? "line-through" : "none",
+                          color: completed ? "var(--muted)" : "var(--ink)",
+                        }}
                       >
-                        ×
-                      </button>
+                        {t.title}
+                        {t.template && <span className="task-template-pill" style={{ marginLeft: 6 }}>{t.template}</span>}
+                      </span>
+
+                      {t.energy !== undefined && (
+                        <span style={{ display: 'flex', gap: 2 }} title={`Energy: ${t.energy}/5`}>
+                          {[1,2,3,4,5].map(i => (
+                            <span key={i} style={{
+                              width: 5, height: 5, borderRadius: '50%',
+                              background: i <= t.energy ? 'var(--accent)' : 'var(--line-soft)'
+                            }} />
+                          ))}
+                        </span>
+                      )}
+
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        {!completed && (
+                          <button className="btn btn-sm btn-ghost" onClick={() => onSetActive(t.id)}>
+                            Start
+                          </button>
+                        )}
+                        <button
+                          className="modal-close"
+                          style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--faint)" }}
+                          onClick={() => handleRemoveTask(t.id)}
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Subtask progress bar for project-template tasks */}
+                    {t.template === 'project' && (() => {
+                      const allSubs = (t.project?.phases ?? []).flatMap(p => p.subs ?? [])
+                      const doneCount = allSubs.filter(s => s.done).length
+                      const totalCount = allSubs.length
+                      if (totalCount === 0) return null
+                      return (
+                        <div style={{ paddingLeft: 32, display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                          <div style={{ flex: 1, background: 'var(--line-soft)', borderRadius: 2, height: 3 }}>
+                            <div style={{ background: 'var(--accent)', width: `${(doneCount/totalCount)*100}%`, height: 3, borderRadius: 2 }} />
+                          </div>
+                          <span style={{ color: 'var(--ink-2)', fontSize: 9, whiteSpace: 'nowrap' }}>{doneCount}/{totalCount} subtasks</span>
+                        </div>
+                      )
+                    })()}
                   </div>
                 );
               })}
