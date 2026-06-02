@@ -72,6 +72,11 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
     return groups;
   }, [pageTasks]);
 
+  // Tasks with no scheduledDate and no dueDate (independent of quad grouping)
+  const anytimeTasks = useMemo(() => {
+    return pageTasks.filter(t => !t.scheduledDate && !t.dueDate);
+  }, [pageTasks]);
+
   // Pre-calculate counts for each filter pill
   const pillCounts = useMemo(() => {
     const counts = { all: tasks.length, open: 0, done: 0 };
@@ -338,6 +343,93 @@ export default function TasksView({ activeTaskId, onSetActive, onNew, onEdit, fi
           </div>
         );
       })}
+
+      {/* Anytime — no date set */}
+      {anytimeTasks.length > 0 && (
+        <div className="task-group" style={{ marginBottom: 20 }}>
+          <div className="task-group-label" style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            color: "var(--muted)",
+            marginBottom: 8,
+            borderBottom: "1px solid var(--line-soft)",
+            paddingBottom: 4
+          }}>
+            <span style={{ fontSize: 14 }}>∞</span>
+            <span>Anytime — no date set</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {anytimeTasks.map((t) => {
+              const active = t.id === activeTaskId;
+              const done = t.done;
+              const templateLabel = getTaskTemplateLabel(t);
+              return (
+                <div
+                  key={t.id}
+                  className="task-row"
+                  data-active={active ? "true" : "false"}
+                  onClick={() => onSetActive(t.id)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 12px",
+                    border: active ? "1.5px solid var(--accent)" : "1px solid var(--line)",
+                    background: active ? "var(--panel-2)" : "var(--panel)",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <span style={{
+                        fontSize: 14,
+                        textDecoration: done ? "line-through" : "none",
+                        color: done ? "var(--faint)" : "var(--ink)",
+                        fontWeight: active ? "600" : "normal",
+                      }}>
+                        {t.title}
+                        {t.template && (
+                          <span className="task-template-pill" style={{
+                            marginLeft: 6,
+                            fontSize: 10,
+                            background: "var(--accent-soft)",
+                            color: "var(--accent)",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            fontWeight: 600,
+                            textTransform: "uppercase"
+                          }}>
+                            {t.template}
+                          </span>
+                        )}
+                      </span>
+                      {templateLabel && (
+                        <span style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
+                          {templateLabel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(t);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Pagination Controls */}
       {pageCount > 1 && (
