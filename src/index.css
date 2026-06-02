@@ -2021,6 +2021,17 @@ textarea {
   color: var(--ink-2);
   flex: 1;
   min-width: 140px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.phase-pill:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+.phase-pill:active {
+  transform: translateY(0);
 }
 .phase-pill-num {
   width: 18px;

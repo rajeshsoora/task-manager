@@ -326,7 +326,7 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
       {/* Template Specific views */}
       {activeTask.template === "book" && <BookTemplate task={activeTask} apiFetch={apiFetch} />}
       {activeTask.template === "skill" && <SkillTemplate task={activeTask} apiFetch={apiFetch} />}
-      {activeTask.template === "project" && <ProjectTemplate task={activeTask} apiFetch={apiFetch} />}
+      {activeTask.template === "project" && <ProjectTemplate key={activeTask.id} task={activeTask} apiFetch={apiFetch} />}
       {activeTask.template === "idle" && <DriftTemplate task={activeTask} apiFetch={apiFetch} />}
 
       {/* ChatGPT Cognitive coach chat logs */}
@@ -677,8 +677,20 @@ function SkillTemplate({ task, apiFetch }) {
 // -------------------------------------------------------------
 function ProjectTemplate({ task, apiFetch }) {
   const phases = task.project?.phases || [];
-  const currentIdx = phases.findIndex((p) => p.status === "doing");
-  const activePhase = currentIdx >= 0 ? phases[currentIdx] : null;
+  
+  // Find current phase: first doing, first todo, or last done phase
+  const currentPhase = phases.find((p) => p.status === "doing") || 
+                       phases.find((p) => p.status === "todo") || 
+                       phases[phases.length - 1] || 
+                       null;
+
+  const [selectedPhaseId, setSelectedPhaseId] = useState(null);
+
+  const resolvedSelectedId = selectedPhaseId && phases.some(p => p.id === selectedPhaseId)
+    ? selectedPhaseId
+    : (currentPhase?.id || null);
+
+  const selectedPhase = phases.find(p => p.id === resolvedSelectedId);
   const donePhasesCount = phases.filter((p) => p.status === "done").length;
 
   const handleToggleSub = (phaseId, subId) => {
@@ -689,23 +701,32 @@ function ProjectTemplate({ task, apiFetch }) {
   };
 
   const handleAdvancePhase = (phaseId) => {
+    const currentIdx = phases.findIndex((p) => p.id === phaseId);
+    const nextPhase = phases[currentIdx + 1];
+
     apiFetch("/actions", {
       method: "POST",
       body: { action: { type: "advance_phase", phaseId, taskId: task.id } },
     });
+
+    if (nextPhase) {
+      setSelectedPhaseId(nextPhase.id);
+    }
   };
 
   return (
     <div className="tpl tpl-project" style={{ border: "1px solid var(--line)", borderRadius: 8, padding: 16, background: "var(--panel)" }}>
       <div className="tpl-summary" style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
         <div>
-          <div className="tpl-summary-label">Current phase</div>
-          <div className="tpl-summary-title serif" style={{ fontSize: 20, fontWeight: 600 }}>
-            {activePhase ? activePhase.title : "All phases completed!"}
+          <div className="tpl-summary-label">
+            {selectedPhase?.id === currentPhase?.id ? "Current phase" : "Selected phase"}
           </div>
-          {activePhase && (
+          <div className="tpl-summary-title serif" style={{ fontSize: 20, fontWeight: 600 }}>
+            {selectedPhase ? selectedPhase.title : "All phases completed!"}
+          </div>
+          {selectedPhase && (
             <div className="tpl-summary-note" style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
-              {activePhase.subs.filter((s) => s.done).length} / {activePhase.subs.length} subtasks done
+              {selectedPhase.subs.filter((s) => s.done).length} / {selectedPhase.subs.length} subtasks done
             </div>
           )}
         </div>
@@ -720,51 +741,56 @@ function ProjectTemplate({ task, apiFetch }) {
       </div>
 
       {/* Progress timeline bar */}
-      <div className="phase-bar" style={{ display: "flex", gap: 4, margin: "16px 0" }}>
+      <div className="phase-bar">
         {phases.map((p, idx) => (
           <div
             key={p.id}
             className="phase-pill"
             data-status={p.status}
+            onClick={() => setSelectedPhaseId(p.id)}
             style={{
-              flex: 1,
-              textAlign: "center",
-              padding: "4px 6px",
-              borderRadius: 4,
-              fontSize: 11,
-              border: "1px solid var(--line)",
-              background: p.status === "done" ? "var(--accent-soft)" : p.status === "doing" ? "var(--panel-2)" : "var(--panel)",
-              color: p.status === "done" ? "var(--accent)" : "var(--ink)",
-              fontWeight: p.status === "doing" ? "600" : "normal",
+              boxShadow: resolvedSelectedId === p.id ? "0 0 0 2px var(--accent)" : "none",
+              border: resolvedSelectedId === p.id ? "1px solid var(--accent)" : undefined,
             }}
           >
-            {idx + 1}
+            <span className="phase-pill-num">{idx + 1}</span>
+            <span className="phase-pill-title" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {p.title}
+            </span>
+            <span className="phase-pill-count">
+              {p.subs.filter((s) => s.done).length}/{p.subs.length}
+            </span>
           </div>
         ))}
       </div>
 
-      {activePhase && (
+      {selectedPhase && (
         <div style={{ border: "1px solid var(--line)", borderRadius: 8, padding: 12, background: "var(--panel-2)" }}>
-          <div className="h-eyebrow" style={{ marginBottom: 8 }}>{activePhase.title} — Checklist</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
-            {activePhase.subs.map((s) => (
-              <label key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
-                <input
-                  type="checkbox"
-                  checked={s.done}
-                  onChange={() => handleToggleSub(activePhase.id, s.id)}
-                  style={{ width: 15, height: 15 }}
-                />
-                <span style={{ textDecoration: s.done ? "line-through" : "none", color: s.done ? "var(--faint)" : "var(--ink)" }}>
+          <div className="h-eyebrow" style={{ marginBottom: 8 }}>{selectedPhase.title} — Checklist</div>
+          <div className="sub-list" style={{ marginBottom: 12 }}>
+            {selectedPhase.subs.map((s) => (
+              <div
+                key={s.id}
+                className="sub-row"
+                onClick={() => handleToggleSub(selectedPhase.id, s.id)}
+              >
+                <div className="sub-check" data-done={s.done ? "true" : "false"} />
+                <span className="sub-label" data-done={s.done ? "true" : "false"}>
                   {s.label}
                 </span>
-              </label>
+              </div>
             ))}
           </div>
 
-          <button className="btn btn-primary btn-sm" onClick={() => handleAdvancePhase(activePhase.id)}>
-            Advance Phase →
-          </button>
+          {selectedPhase.status !== "done" ? (
+            <button className="btn btn-primary btn-sm" onClick={() => handleAdvancePhase(selectedPhase.id)}>
+              Advance Phase →
+            </button>
+          ) : (
+            <div style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>
+              ✓ Phase Completed
+            </div>
+          )}
         </div>
       )}
     </div>
