@@ -93,6 +93,25 @@ export function AppDataProvider({ children }) {
   const [tweaks, setTweaksState] = useState(DEFAULT_TWEAKS);
   const [dailyPlans, setDailyPlans] = useState({});
 
+  const DEFAULT_TRAITS = {
+    conscientiousness:   { score: 50, history: [] },
+    perfectionism:       { score: 50, history: [] },
+    emotionalRegulation: { score: 50, history: [] },
+    timePerspective:     { score: 50, history: [] },
+    impulsivity:         { score: 50, history: [] },
+    selfEfficacy:        { score: 50, history: [] },
+    onboardingComplete:  false,
+    lastEvaluationAt:    null,
+    evaluationCount:     0,
+  };
+
+  const [profile, setProfile] = useState({
+    traits: null,
+    patterns: null,
+    context: null,
+    loaded: false,
+  });
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -107,6 +126,7 @@ export function AppDataProvider({ children }) {
         setActiveTaskId(null);
         setCustomMoodTags(["productive", "mindful", "inspired"]);
         setDailyPlans({});
+        setProfile({ traits: null, patterns: null, context: null, loaded: false });
         setLoading(false);
       }
     });
@@ -122,11 +142,14 @@ export function AppDataProvider({ children }) {
       await seedNewUser(uid);
     }
 
-    const [tasksSnap, eventsSnap, plansSnap, freshPrefs] = await Promise.all([
+    const [tasksSnap, eventsSnap, plansSnap, freshPrefs, traitsSnap, patternsSnap, contextSnap] = await Promise.all([
       getDocs(collection(db, "users", uid, "tasks")),
       getDocs(query(collection(db, "users", uid, "events"), orderBy("timestamp", "desc"))),
       getDocs(collection(db, "users", uid, "daily_plans")),
       getDoc(prefsRef),
+      getDoc(doc(db, "users", uid, "profile", "traits")),
+      getDoc(doc(db, "users", uid, "profile", "patterns")),
+      getDoc(doc(db, "users", uid, "profile", "context")),
     ]);
 
     setTasks(tasksSnap.docs.map(d => docToTask(d.id, d.data())));
@@ -145,6 +168,13 @@ export function AppDataProvider({ children }) {
     const t = p.tweaks || DEFAULT_TWEAKS;
     setTweaksState(t);
     applyTweaksToDOM(t);
+
+    setProfile({
+      traits: traitsSnap.exists() ? traitsSnap.data() : null,
+      patterns: patternsSnap.exists() ? patternsSnap.data() : null,
+      context: contextSnap.exists() ? contextSnap.data() : null,
+      loaded: true,
+    });
 
     setLoading(false);
   }
@@ -181,6 +211,68 @@ export function AppDataProvider({ children }) {
     applyTweaksToDOM(newTweaks);
     if (user) {
       await updateDoc(doc(db, "users", user.uid, "preferences", "prefs"), { tweaks: newTweaks });
+    }
+  };
+
+  const saveProfileTraits = async (newTraits) => {
+    setProfile(prev => ({ ...prev, traits: newTraits }));
+    if (user) await setDoc(doc(db, "users", user.uid, "profile", "traits"), newTraits);
+  };
+
+  const saveProfilePatterns = async (newPatterns) => {
+    setProfile(prev => ({ ...prev, patterns: newPatterns }));
+    if (user) await setDoc(doc(db, "users", user.uid, "profile", "patterns"), newPatterns);
+  };
+
+  const saveProfileContext = async (newContext) => {
+    setProfile(prev => ({ ...prev, context: newContext }));
+    if (user) await setDoc(doc(db, "users", user.uid, "profile", "context"), newContext);
+  };
+
+  const saveCoachSession = async (sessionData) => {
+    if (!user) return;
+    const ref = await addDoc(collection(db, "users", user.uid, "profile", "sessions"), sessionData);
+    return ref.id;
+  };
+
+  const loadCoachSessions = async () => {
+    if (!user) return [];
+    const snap = await getDocs(collection(db, "users", user.uid, "profile", "sessions"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
+
+  const saveMonthLog = async (yearMonth, logText) => {
+    if (!user) return;
+    await setDoc(doc(db, "users", user.uid, "profile", "monthLogs", yearMonth), {
+      summary: logText,
+      createdAt: new Date().toISOString(),
+    });
+  };
+
+  const saveQuarterLog = async (yearQuarter, logText) => {
+    if (!user) return;
+    await setDoc(doc(db, "users", user.uid, "profile", "quarterLogs", yearQuarter), {
+      summary: logText,
+      createdAt: new Date().toISOString(),
+    });
+  };
+
+  const loadMonthLogs = async () => {
+    if (!user) return [];
+    const snap = await getDocs(collection(db, "users", user.uid, "profile", "monthLogs"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
+
+  const loadQuarterLogs = async () => {
+    if (!user) return [];
+    const snap = await getDocs(collection(db, "users", user.uid, "profile", "quarterLogs"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
+
+  const deleteCoachSessions = async (sessionIds) => {
+    if (!user) return;
+    for (const id of sessionIds) {
+      await deleteDoc(doc(db, "users", user.uid, "profile", "sessions", id));
     }
   };
 
@@ -497,8 +589,20 @@ export function AppDataProvider({ children }) {
       signIn,
       signUp,
       signOut,
+      profile,
+      saveProfileTraits,
+      saveProfilePatterns,
+      saveProfileContext,
+      saveCoachSession,
+      loadCoachSessions,
+      saveMonthLog,
+      saveQuarterLog,
+      loadMonthLogs,
+      loadQuarterLogs,
+      deleteCoachSessions,
+      DEFAULT_TRAITS,
     }),
-    [user, loading, tasks, events, currentMood, lastCheckInAt, lastCheckInEnergy, activeTaskId, customMoodTags, tweaks, dailyPlans]
+    [user, loading, tasks, events, currentMood, lastCheckInAt, lastCheckInEnergy, activeTaskId, customMoodTags, tweaks, dailyPlans, profile]
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
