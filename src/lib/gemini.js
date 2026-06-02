@@ -389,6 +389,79 @@ Second person ("The user..."). Past tense. No identity labels. Return only the s
 }
 
 /**
+ * Generates subtasks for a task using Gemini.
+ * @param {object} task - Full task object (title, kind, energy, moods, template)
+ * @param {string} userContext - Optional free-text context from the user
+ * @param {boolean} personalized - Whether to use profile snapshot for personalization
+ * @param {object|null} profileSnapshot - { traits, patterns, context } from AppContext profile state
+ * @returns {Promise<object>} - Structured subtask data ready for the preview modal
+ */
+export async function generateSubtasks(task, userContext, personalized, profileSnapshot) {
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const templateType = task.template || "none";
+
+  const energyRule = task.energy >= 4
+    ? "This task has high energy cost. Break it into smaller, lower-friction steps. The first step should take under 10 minutes."
+    : "";
+
+  const avoidanceMoods = ["anxious", "heavy", "dreading", "stressed", "overwhelmed"];
+  const hasMoodFlag = (task.moods || []).some(m => avoidanceMoods.includes(m));
+  const moodRule = hasMoodFlag
+    ? "The user has flagged this task with resistance-related mood tags. Make the first action extremely concrete and small — something they can do in under 5 minutes."
+    : "";
+
+  let profileSection = "";
+  if (personalized && profileSnapshot?.traits) {
+    const { traits } = profileSnapshot;
+    const flags = [
+      traits.perfectionism?.score > 65 ? `- High perfectionism (${traits.perfectionism.score}/100): include a "done is better than perfect" or "ship it" milestone` : null,
+      traits.selfEfficacy?.score < 45 ? `- Low self-efficacy (${traits.selfEfficacy.score}/100): start with the easiest possible first step to build momentum` : null,
+      traits.emotionalRegulation?.score < 45 ? `- Low emotional regulation (${traits.emotionalRegulation.score}/100): keep steps short, reduce friction at every transition` : null,
+      traits.timePerspective?.score < 45 ? `- Time discounting tendency: add estimated durations to each step where possible` : null,
+    ].filter(Boolean);
+    if (flags.length > 0) {
+      profileSection = `\nUser profile signals (use these to shape step design):\n${flags.join("\n")}`;
+    }
+  }
+
+  const formatByTemplate = {
+    project: `{ "phases": [{ "title": "<phase title>", "subs": ["<subtask label>", ...] }] }`,
+    none:    `{ "phases": [{ "title": "<phase title>", "subs": ["<subtask label>", ...] }] }`,
+    book:    `{ "chapters": ["<chapter title>", ...] }`,
+    skill:   `{ "drills": ["<drill label>", ...] }`,
+  };
+  const formatInstruction = formatByTemplate[templateType] || formatByTemplate.none;
+
+  const prompt = `You are breaking down a task into concrete, actionable subtasks for a personal task manager.
+
+Task: "${task.title}"
+Kind: ${task.kind}
+Energy required: ${task.energy}/5
+Mood tags: ${(task.moods || []).join(", ") || "none"}
+Template type: ${templateType}${userContext ? `\nUser context: "${userContext}"` : ""}${profileSection}
+
+${energyRule}
+${moodRule}
+
+Rules:
+- Generate 3–7 phases/chapters/drills maximum. Quality over quantity.
+- Each step title must be an action verb (e.g. "Draft", "Review", "Set up", "Practice").
+- For project template: 2–4 subtasks per phase.
+- No vague steps like "Do research" — be specific to the task title.
+
+Return JSON only — no markdown, no explanation:
+${formatInstruction}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  const jsonText = text.startsWith("```") ? text.replace(/```json?\n?/g, "").replace(/```/g, "").trim() : text;
+  const parsed = JSON.parse(jsonText);
+
+  return { templateType: templateType === "none" ? "project" : templateType, data: parsed };
+}
+
+/**
  * Compresses multiple month logs into a quarterly summary.
  * @param {Array<{id: string, summary: string, createdAt: string}>} monthLogs
  * @returns {Promise<string>} - Quarter log text
