@@ -16,6 +16,7 @@ export default function TodayView({ onSetActive }) {
   const [pendingOrder, setPendingOrder] = useState(null); // null = no drag in progress
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [reschedulingId, setReschedulingId] = useState(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -121,6 +122,17 @@ export default function TodayView({ onSetActive }) {
     }
   };
 
+  // Auto-inject tasks scheduled for today that aren't already in the plan
+  useEffect(() => {
+    if (!plan || loading) return;
+    const scheduledToday = tasks.filter(
+      (t) => t.scheduledDate === todayStr && !plan.taskIds.includes(t.id) && !t.done
+    );
+    if (scheduledToday.length === 0) return;
+    const newIds = [...scheduledToday.map((t) => t.id), ...plan.taskIds];
+    savePlan(newIds); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [plan?.taskIds?.join(","), loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleAddTask = (id) => {
     if (!plannedSet.has(id)) {
       savePlan([...plannedIds, id]);
@@ -129,6 +141,16 @@ export default function TodayView({ onSetActive }) {
 
   const handleRemoveTask = (id) => {
     savePlan(plannedIds.filter((x) => x !== id));
+  };
+
+  const handleReschedule = async (taskId, newDate) => {
+    if (!newDate) return;
+    setReschedulingId(null);
+    await apiFetch("/actions", {
+      method: "POST",
+      body: { action: { type: "update_task", taskId, task: { scheduledDate: newDate } } },
+    });
+    await savePlan(plannedIds.filter((id) => id !== taskId));
   };
 
   const handleCarryForward = async () => {
@@ -317,6 +339,9 @@ export default function TodayView({ onSetActive }) {
                       >
                         {t.title}
                         {t.template && <span className="task-template-pill" style={{ marginLeft: 6 }}>{t.template}</span>}
+                        {t.scheduledDate === todayStr && (
+                          <span style={{ fontSize: 10, color: 'var(--accent)', opacity: 0.7, marginLeft: 4 }}>📅</span>
+                        )}
                       </span>
 
                       {t.energy !== undefined && (
@@ -335,6 +360,27 @@ export default function TodayView({ onSetActive }) {
                           <button className="btn btn-sm btn-ghost" onClick={() => onSetActive(t.id)}>
                             Start
                           </button>
+                        )}
+                        {t.scheduledDate === todayStr && (
+                          reschedulingId === t.id
+                            ? (
+                              <input
+                                type="date"
+                                autoFocus
+                                min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().slice(0, 10)}
+                                style={{ fontSize: 11, width: 120, padding: '2px 4px', background: 'var(--panel-2)', border: '1px solid var(--line)', borderRadius: 4, color: 'var(--ink)' }}
+                                onChange={(e) => handleReschedule(t.id, e.target.value)}
+                                onBlur={() => setReschedulingId(null)}
+                              />
+                            )
+                            : (
+                              <button
+                                className="btn btn-sm btn-ghost"
+                                title="Give it a new day"
+                                onClick={() => setReschedulingId(t.id)}
+                                style={{ fontSize: 12 }}
+                              >↻</button>
+                            )
                         )}
                         <button
                           className="modal-close"
