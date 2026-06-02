@@ -1,0 +1,97 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7]: Mind Manager
+    - generic [ref=e8]:
+      - button "Now Active" [ref=e606] [cursor=pointer]:
+        - generic [ref=e11]: Now
+        - generic [ref=e607]: Active
+      - button "Today's plan" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: Today's plan
+      - button "All tasks" [ref=e15] [cursor=pointer]:
+        - generic [ref=e17]: All tasks
+      - button "Priority matrix" [ref=e18] [cursor=pointer]:
+        - generic [ref=e20]: Priority matrix
+      - button "Timeline" [ref=e21] [cursor=pointer]:
+        - generic [ref=e23]: Timeline
+    - generic [ref=e24]: Categories
+    - generic [ref=e25]:
+      - button "work 1" [ref=e578] [cursor=pointer]:
+        - generic [ref=e28]: work
+        - generic [ref=e29]: "1"
+      - button "learning 1" [ref=e30] [cursor=pointer]:
+        - generic [ref=e32]: learning
+        - generic [ref=e33]: "1"
+      - button "craft 1" [ref=e34] [cursor=pointer]:
+        - generic [ref=e36]: craft
+        - generic [ref=e37]: "1"
+    - button "＋ New task" [ref=e39] [cursor=pointer]
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e42]: Now
+      - button "🧠 CHECK IN" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🧠
+        - generic [ref=e45]: CHECK IN
+      - button "⚙" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]: guest@mindmanager.local
+      - button "Sign out" [ref=e49] [cursor=pointer]
+    - generic [ref=e557]:
+      - generic [ref=e558]:
+        - generic [ref=e608]:
+          - generic [ref=e609]: 🎯 Focus Target · learning
+          - button "Edit details" [ref=e610] [cursor=pointer]
+        - heading "Read 'Atomic Habits' by James Clear" [level=1] [ref=e611]
+        - generic [ref=e612]:
+          - button "✓ Mark Complete" [ref=e613] [cursor=pointer]
+          - button "⏸ Pause / Park" [ref=e614] [cursor=pointer]
+      - generic [ref=e615]:
+        - generic [ref=e616]:
+          - generic [ref=e617]:
+            - generic [ref=e618]: Currently reading
+            - generic [ref=e619]: "Ch 2 · The 1st Law: Make It Obvious"
+            - generic [ref=e620]: "\"Implementation intentions and habit stacking.\""
+          - generic [ref=e621]:
+            - generic [ref=e622]:
+              - generic [ref=e623]: "1"
+              - generic [ref=e624]: / 5 ch
+            - generic [ref=e627]: 20% complete
+        - generic [ref=e628]: CHAPTERS LIST
+        - generic [ref=e629]:
+          - generic [ref=e630]:
+            - generic [ref=e631]:
+              - checkbox [checked] [ref=e632]
+              - generic [ref=e633]: "Ch 1 · The Fundamentals: Why Tiny Changes Make a Big Difference"
+            - button "✍ Note" [ref=e635] [cursor=pointer]
+          - generic [ref=e636]:
+            - generic [ref=e637]:
+              - checkbox [ref=e638]
+              - generic [ref=e639]: "Ch 2 · The 1st Law: Make It Obvious"
+            - button "✍ Note" [ref=e641] [cursor=pointer]
+          - generic [ref=e642]:
+            - generic [ref=e643]:
+              - checkbox [ref=e644]
+              - generic [ref=e645]: "Ch 3 · The 2nd Law: Make It Attractive"
+            - generic [ref=e646]:
+              - button "Read" [ref=e647] [cursor=pointer]
+              - button "✍ Note" [ref=e648] [cursor=pointer]
+          - generic [ref=e649]:
+            - generic [ref=e650]:
+              - checkbox [ref=e651]
+              - generic [ref=e652]: "Ch 4 · The 3rd Law: Make It Easy"
+            - generic [ref=e653]:
+              - button "Read" [ref=e654] [cursor=pointer]
+              - button "✍ Note" [ref=e655] [cursor=pointer]
+          - generic [ref=e656]:
+            - generic [ref=e657]:
+              - checkbox [ref=e658]
+              - generic [ref=e659]: "Ch 5 · The 4th Law: Make It Satisfying"
+            - generic [ref=e660]:
+              - button "Read" [ref=e661] [cursor=pointer]
+              - button "✍ Note" [ref=e662] [cursor=pointer]
+      - generic [ref=e663]:
+        - generic [ref=e664]:
+          - generic [ref=e665]: 🧠
+          - generic [ref=e666]: Mind Coach
+        - generic [ref=e668]: How is your focus going? Let me know if you are facing any friction.
+        - generic [ref=e669]:
+          - textbox "Tell Mind what's on your mind..." [ref=e670]
+          - button "Send" [disabled] [ref=e671] [cursor=pointer]

@@ -1,0 +1,148 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7]: Mind Manager
+    - generic [ref=e8]:
+      - button "Now Active" [ref=e183] [cursor=pointer]:
+        - generic [ref=e11]: Now
+        - generic [ref=e184]: Active
+      - button "Today's plan" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: Today's plan
+      - button "All tasks" [ref=e15] [cursor=pointer]:
+        - generic [ref=e17]: All tasks
+      - button "Priority matrix" [ref=e18] [cursor=pointer]:
+        - generic [ref=e20]: Priority matrix
+      - button "Timeline" [active] [ref=e21] [cursor=pointer]:
+        - generic [ref=e23]: Timeline
+    - generic [ref=e24]: Categories
+    - generic [ref=e25]:
+      - button "work 2" [ref=e177] [cursor=pointer]:
+        - generic [ref=e28]: work
+        - generic [ref=e29]: "2"
+      - button "learning 1" [ref=e30] [cursor=pointer]:
+        - generic [ref=e32]: learning
+        - generic [ref=e33]: "1"
+      - button "craft 1" [ref=e34] [cursor=pointer]:
+        - generic [ref=e36]: craft
+        - generic [ref=e37]: "1"
+    - button "＋ New task" [ref=e39] [cursor=pointer]
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e42]: Timeline
+      - button "🧠 CHECK IN" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🧠
+        - generic [ref=e45]: CHECK IN
+      - button "⚙" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]: guest@mindmanager.local
+      - button "Sign out" [ref=e49] [cursor=pointer]
+    - generic [ref=e425]:
+      - generic [ref=e426]:
+        - generic [ref=e427]: Timeline
+        - heading "Audit your mind." [level=2] [ref=e428]
+        - paragraph [ref=e429]: Energy across sessions, the moods you spent your time in, and every switch with its reason.
+        - generic [ref=e430]:
+          - button "7 days" [ref=e431] [cursor=pointer]
+          - button "30 days" [ref=e432] [cursor=pointer]
+          - button "All" [ref=e433] [cursor=pointer]
+      - generic [ref=e434]:
+        - generic [ref=e435]: Energy line
+        - generic [ref=e436]: Each dot is an event. Color = mood at the time.
+        - img [ref=e437]:
+          - generic [ref=e439]: "1"
+          - generic [ref=e441]: "2"
+          - generic [ref=e443]: "3"
+          - generic [ref=e445]: "4"
+          - generic [ref=e447]: "5"
+          - generic "checkin · focused, creative · Energy 4" [ref=e449]
+          - generic "Mindfulness and Deep Breathing · calm · Energy 2" [ref=e450]
+          - generic "Read 'Atomic Habits' by James Clear · calm · Energy 3" [ref=e451]
+          - generic "checkin · calm, focused · Energy 3" [ref=e452]
+          - generic "Test New Task · — · Energy 3" [ref=e453]
+        - generic [ref=e454]:
+          - generic [ref=e455]: focused
+          - generic [ref=e457]: creative
+          - generic [ref=e459]: calm
+          - generic [ref=e461]: social
+          - generic [ref=e463]: curious
+          - generic [ref=e465]: restless
+          - generic [ref=e467]: tired
+          - generic [ref=e469]: scattered
+      - generic [ref=e471]:
+        - generic [ref=e472]:
+          - generic [ref=e473]: Event Log
+          - generic [ref=e474]:
+            - generic [ref=e475]: Today
+            - generic [ref=e476]:
+              - generic [ref=e477] [cursor=pointer]:
+                - generic [ref=e478]: Progress
+                - generic [ref=e479]:
+                  - generic [ref=e480]: "Started working on: Test New Task"
+                  - generic [ref=e481]: Test New Task
+                - generic [ref=e482]: 20:52
+              - generic [ref=e483] [cursor=pointer]:
+                - generic [ref=e484]: Drift
+                - generic [ref=e485]:
+                  - generic [ref=e486]: Mindfulness and Deep Breathing
+                  - generic [ref=e487]: Mindfulness and Deep Breathing
+                  - generic [ref=e488]:
+                    - generic [ref=e489]: calm
+                    - generic [ref=e490]: · energy 2/5
+                  - generic [ref=e491]: "Drift time: 15m"
+                - generic [ref=e492]: 05:51
+              - generic [ref=e493]:
+                - generic [ref=e494]: Check-in
+                - generic [ref=e495]:
+                  - generic [ref=e496]: —
+                  - generic [ref=e497]:
+                    - generic [ref=e498]: focused
+                    - generic [ref=e499]: creative
+                    - generic [ref=e500]: · energy 4/5
+                - generic [ref=e501]: 20:51
+          - generic [ref=e502]:
+            - generic [ref=e503]: Yesterday
+            - generic [ref=e504]:
+              - generic [ref=e505]:
+                - generic [ref=e506]: Check-in
+                - generic [ref=e507]:
+                  - generic [ref=e508]: —
+                  - generic [ref=e509]:
+                    - generic [ref=e510]: calm
+                    - generic [ref=e511]: focused
+                    - generic [ref=e512]: · energy 3/5
+                - generic [ref=e513]: 20:51
+              - generic [ref=e514] [cursor=pointer]:
+                - generic [ref=e515]: Progress
+                - generic [ref=e516]:
+                  - generic [ref=e517]: Marked Chapter 1 as Done
+                  - generic [ref=e518]: Read 'Atomic Habits' by James Clear
+                  - generic [ref=e519]:
+                    - generic [ref=e520]: calm
+                    - generic [ref=e521]: · energy 3/5
+                - generic [ref=e522]: 21:51
+        - generic [ref=e523]:
+          - generic [ref=e524]:
+            - generic [ref=e525]: Last 7 days
+            - generic [ref=e526]:
+              - generic [ref=e527]:
+                - generic [ref=e528]: "5"
+                - generic [ref=e529]: events
+              - generic [ref=e530]:
+                - generic [ref=e531]: 0.3h
+                - generic [ref=e532]: drift
+              - generic [ref=e533]:
+                - generic [ref=e534]: "3.0"
+                - generic [ref=e535]: avg energy
+              - generic [ref=e536]:
+                - generic [ref=e537]: "0"
+                - generic [ref=e538]: switches
+          - generic [ref=e539]:
+            - generic [ref=e540]: Mood frequency
+            - generic [ref=e541]:
+              - generic [ref=e542]:
+                - generic [ref=e543]: calm
+                - generic [ref=e546]: "3"
+              - generic [ref=e547]:
+                - generic [ref=e548]: focused
+                - generic [ref=e551]: "2"
+              - generic [ref=e552]:
+                - generic [ref=e553]: creative
+                - generic [ref=e556]: "1"

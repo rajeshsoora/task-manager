@@ -1,0 +1,114 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7]: Mind Manager
+    - generic [ref=e8]:
+      - button "Now Active" [ref=e606] [cursor=pointer]:
+        - generic [ref=e11]: Now
+        - generic [ref=e607]: Active
+      - button "Today's plan" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: Today's plan
+      - button "All tasks" [active] [ref=e15] [cursor=pointer]:
+        - generic [ref=e17]: All tasks
+      - button "Priority matrix" [ref=e18] [cursor=pointer]:
+        - generic [ref=e20]: Priority matrix
+      - button "Timeline" [ref=e21] [cursor=pointer]:
+        - generic [ref=e23]: Timeline
+    - generic [ref=e24]: Categories
+    - generic [ref=e25]:
+      - button "work 1" [ref=e578] [cursor=pointer]:
+        - generic [ref=e28]: work
+        - generic [ref=e29]: "1"
+      - button "learning 1" [ref=e30] [cursor=pointer]:
+        - generic [ref=e32]: learning
+        - generic [ref=e33]: "1"
+      - button "craft 1" [ref=e34] [cursor=pointer]:
+        - generic [ref=e36]: craft
+        - generic [ref=e37]: "1"
+    - button "＋ New task" [ref=e39] [cursor=pointer]
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e42]: All tasks
+      - button "🧠 CHECK IN" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🧠
+        - generic [ref=e45]: CHECK IN
+      - button "⚙" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]: guest@mindmanager.local
+      - button "Sign out" [ref=e49] [cursor=pointer]
+    - generic [ref=e672]:
+      - generic [ref=e673]:
+        - generic [ref=e674]:
+          - generic [ref=e675]: 4 open tasks
+          - heading "All tasks" [level=1] [ref=e676]
+        - generic [ref=e677]:
+          - generic [ref=e678]:
+            - button "all 5" [ref=e679] [cursor=pointer]:
+              - generic [ref=e680]: all
+              - generic [ref=e681]: "5"
+            - button "open 4" [ref=e682] [cursor=pointer]:
+              - generic [ref=e683]: open
+              - generic [ref=e684]: "4"
+            - button "done 1" [ref=e685] [cursor=pointer]:
+              - generic [ref=e686]: done
+              - generic [ref=e687]: "1"
+            - button "work 1" [ref=e688] [cursor=pointer]:
+              - generic [ref=e689]: work
+              - generic [ref=e690]: "1"
+            - button "learning 1" [ref=e691] [cursor=pointer]:
+              - generic [ref=e692]: learning
+              - generic [ref=e693]: "1"
+            - button "craft 1" [ref=e694] [cursor=pointer]:
+              - generic [ref=e695]: craft
+              - generic [ref=e696]: "1"
+          - button "＋ New task" [ref=e697] [cursor=pointer]
+      - generic [ref=e698]: · Click a task to open it as the current active target. Each task carries its own progress template.
+      - generic [ref=e699]:
+        - generic [ref=e702]: Do now
+        - generic [ref=e704] [cursor=pointer]:
+          - generic [ref=e705]:
+            - button [ref=e706]
+            - generic [ref=e707]:
+              - generic [ref=e708]:
+                - text: Launch Mind Manager Application
+                - generic [ref=e709]: project
+              - generic [ref=e710]: 1/3 phases
+          - generic [ref=e711]:
+            - generic "work" [ref=e712]: 💼
+            - button "Edit" [ref=e719]
+      - generic [ref=e720]:
+        - generic [ref=e723]: Schedule
+        - generic [ref=e724]:
+          - generic [ref=e725] [cursor=pointer]:
+            - generic [ref=e726]:
+              - button [ref=e727]
+              - generic [ref=e728]:
+                - generic [ref=e729]:
+                  - text: Read 'Atomic Habits' by James Clear
+                  - generic [ref=e730]: book
+                - generic [ref=e731]: 2/5 ch
+            - generic [ref=e732]:
+              - generic "learning" [ref=e733]: 📚
+              - button "Edit" [ref=e740]
+          - generic [ref=e741] [cursor=pointer]:
+            - generic [ref=e742]:
+              - button [ref=e743]
+              - generic [ref=e744]:
+                - generic [ref=e745]:
+                  - text: Master HSL & OKLCH Color Gradients
+                  - generic [ref=e746]: skill
+                - generic [ref=e747]: 3 drills
+            - generic [ref=e748]:
+              - generic "craft" [ref=e749]: 🎨
+              - button "Edit" [ref=e756]
+      - generic [ref=e757]:
+        - generic [ref=e760]: Drop or drift
+        - generic [ref=e762] [cursor=pointer]:
+          - generic [ref=e763]:
+            - button [ref=e764]
+            - generic [ref=e765]:
+              - generic [ref=e766]:
+                - text: Mindfulness and Deep Breathing
+                - generic [ref=e767]: idle
+              - generic [ref=e768]: idle
+          - generic [ref=e769]:
+            - generic "drift" [ref=e770]: 🧘
+            - button "Edit" [ref=e777]

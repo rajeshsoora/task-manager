@@ -1,0 +1,53 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7]: Mind Manager
+    - generic [ref=e8]:
+      - button "Now Active" [ref=e183] [cursor=pointer]:
+        - generic [ref=e11]: Now
+        - generic [ref=e184]: Active
+      - button "Today's plan" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: Today's plan
+      - button "All tasks" [ref=e15] [cursor=pointer]:
+        - generic [ref=e17]: All tasks
+      - button "Priority matrix" [ref=e18] [cursor=pointer]:
+        - generic [ref=e20]: Priority matrix
+      - button "Timeline" [ref=e21] [cursor=pointer]:
+        - generic [ref=e23]: Timeline
+    - generic [ref=e24]: Categories
+    - generic [ref=e25]:
+      - button "work 2" [ref=e177] [cursor=pointer]:
+        - generic [ref=e28]: work
+        - generic [ref=e29]: "2"
+      - button "learning 1" [ref=e30] [cursor=pointer]:
+        - generic [ref=e32]: learning
+        - generic [ref=e33]: "1"
+      - button "craft 1" [ref=e34] [cursor=pointer]:
+        - generic [ref=e36]: craft
+        - generic [ref=e37]: "1"
+    - button "＋ New task" [ref=e39] [cursor=pointer]
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - generic [ref=e42]: Now
+      - button "🧠 CHECK IN" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🧠
+        - generic [ref=e45]: CHECK IN
+      - button "⚙" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]: guest@mindmanager.local
+      - button "Sign out" [ref=e49] [cursor=pointer]
+    - generic [ref=e100]:
+      - generic [ref=e101]:
+        - generic [ref=e185]:
+          - generic [ref=e186]: 🎯 Focus Target · work
+          - button "Edit details" [ref=e187] [cursor=pointer]
+        - heading "Test New Task" [level=1] [ref=e188]
+        - generic [ref=e189]:
+          - button "✓ Mark Complete" [ref=e190] [cursor=pointer]
+          - button "⏸ Pause / Park" [ref=e191] [cursor=pointer]
+      - generic [ref=e192]:
+        - generic [ref=e193]:
+          - generic [ref=e194]: 🧠
+          - generic [ref=e195]: Mind Coach
+        - generic [ref=e197]: How is your focus going? Let me know if you are facing any friction.
+        - generic [ref=e198]:
+          - textbox "Tell Mind what's on your mind..." [ref=e199]
+          - button "Send" [disabled] [ref=e200] [cursor=pointer]

@@ -1,0 +1,243 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e7]: Mind Manager
+    - generic [ref=e8]:
+      - button "Now Active" [ref=e9] [cursor=pointer]:
+        - generic [ref=e11]: Now
+        - generic [ref=e12]: Active
+      - button "Today's plan" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]: Today's plan
+      - button "All tasks" [ref=e16] [cursor=pointer]:
+        - generic [ref=e18]: All tasks
+      - button "Priority matrix" [ref=e19] [cursor=pointer]:
+        - generic [ref=e21]: Priority matrix
+      - button "Timeline" [ref=e22] [cursor=pointer]:
+        - generic [ref=e24]: Timeline
+    - generic [ref=e25]: Categories
+    - generic [ref=e26]:
+      - button "work 1" [ref=e27] [cursor=pointer]:
+        - generic [ref=e29]: work
+        - generic [ref=e30]: "1"
+      - button "learning 1" [ref=e31] [cursor=pointer]:
+        - generic [ref=e33]: learning
+        - generic [ref=e34]: "1"
+      - button "craft 1" [ref=e35] [cursor=pointer]:
+        - generic [ref=e37]: craft
+        - generic [ref=e38]: "1"
+    - button "＋ New task" [ref=e40] [cursor=pointer]
+  - main [ref=e41]:
+    - generic [ref=e42]:
+      - generic [ref=e43]: Now
+      - button "🧠 CHECK IN" [ref=e44] [cursor=pointer]:
+        - generic [ref=e45]: 🧠
+        - generic [ref=e46]: CHECK IN
+      - button "⚙" [ref=e48] [cursor=pointer]
+      - generic [ref=e49]: guest@mindmanager.local
+      - button "Sign out" [ref=e50] [cursor=pointer]
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: 🎯 Focus Target · work
+          - button "Edit details" [active] [ref=e56] [cursor=pointer]
+        - heading "Launch Mind Manager Application" [level=1] [ref=e57]
+        - generic [ref=e58]:
+          - button "✓ Mark Complete" [ref=e59] [cursor=pointer]
+          - button "⏸ Pause / Park" [ref=e60] [cursor=pointer]
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: Current phase
+            - generic [ref=e65]: Build Premium Views & Drag-and-Drop Planning
+            - generic [ref=e66]: 1 / 3 subtasks done
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]: "1"
+              - generic [ref=e70]: / 3
+            - generic [ref=e71]: phases done
+        - generic [ref=e72]:
+          - generic [ref=e73]: "1"
+          - generic [ref=e74]: "2"
+          - generic [ref=e75]: "3"
+        - generic [ref=e76]:
+          - generic [ref=e77]: Build Premium Views & Drag-and-Drop Planning — Checklist
+          - generic [ref=e78]:
+            - generic [ref=e79] [cursor=pointer]:
+              - checkbox "Integrate Eisenhower Priority Matrix Grid" [checked] [ref=e80]
+              - generic [ref=e81]: Integrate Eisenhower Priority Matrix Grid
+            - generic [ref=e82] [cursor=pointer]:
+              - checkbox "Implement Drag and Drop in Today's Plan" [ref=e83]
+              - generic [ref=e84]: Implement Drag and Drop in Today's Plan
+            - generic [ref=e85] [cursor=pointer]:
+              - checkbox "Design SVG Timeline charts" [ref=e86]
+              - generic [ref=e87]: Design SVG Timeline charts
+          - button "Advance Phase →" [ref=e88] [cursor=pointer]
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e91]: 🧠
+          - generic [ref=e92]: Mind Coach
+        - generic [ref=e94]: How is your focus going? Let me know if you are facing any friction.
+        - generic [ref=e95]:
+          - textbox "Tell Mind what's on your mind..." [ref=e96]
+          - button "Send" [disabled] [ref=e97] [cursor=pointer]
+  - generic [ref=e99]:
+    - generic [ref=e100]:
+      - heading "Edit Focus Task" [level=2] [ref=e101]
+      - button "×" [ref=e102] [cursor=pointer]
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e105]: Task Title
+        - textbox "What task wants your attention?" [ref=e106]: Launch Mind Manager Application
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]: Quadrant
+          - combobox [ref=e110]:
+            - 'option "Q1: Do Now (Urgent & Important)" [selected]'
+            - 'option "Q2: Schedule (Important)"'
+            - 'option "Q3: Delegate / Quick (Urgent)"'
+            - 'option "Q4: Drop or Drift"'
+        - generic [ref=e111]:
+          - generic [ref=e112]: Energy scale
+          - generic [ref=e119]: 5/5
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - generic [ref=e122]: Category
+          - combobox [ref=e123]:
+            - option "work" [selected]
+            - option "learning"
+            - option "body"
+            - option "social"
+            - option "wealth"
+            - option "music"
+            - option "craft"
+            - option "errand"
+            - option "drift"
+        - generic [ref=e124]:
+          - generic [ref=e125]: Recurrence Cadence
+          - combobox [ref=e126]:
+            - option "once" [selected]
+            - option "daily"
+            - option "weekly"
+            - option "biweekly"
+            - option "loose"
+      - generic [ref=e127]:
+        - generic [ref=e128]: Interactive Template
+        - combobox [disabled] [ref=e129]:
+          - option "Standard checklist task"
+          - option "Book template (chapters tracker)"
+          - option "Skill template (drills mastery)"
+          - option "Project template (phases workflow)" [selected]
+          - option "Drift template (relaxation timer)"
+      - generic [ref=e130]:
+        - text: Project Phases builder
+        - generic [ref=e131]:
+          - textbox "Phase Title" [ref=e132]
+          - button "＋ Add" [ref=e133] [cursor=pointer]
+        - generic [ref=e134]:
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - generic [ref=e137]: "Phase 1: Local State Engine Scaffold"
+              - button "×" [ref=e138] [cursor=pointer]
+            - generic [ref=e139]:
+              - textbox "Add subtask checklist" [ref=e140]
+              - button "＋" [ref=e141] [cursor=pointer]
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - generic [ref=e144]: "- Create AppContext.jsx store"
+                - button "×" [ref=e145] [cursor=pointer]
+              - generic [ref=e146]:
+                - generic [ref=e147]: "- Implement local storage caching"
+                - button "×" [ref=e148] [cursor=pointer]
+          - generic [ref=e149]:
+            - generic [ref=e150]:
+              - generic [ref=e151]: "Phase 2: Build Premium Views & Drag-and-Drop Planning"
+              - button "×" [ref=e152] [cursor=pointer]
+            - generic [ref=e153]:
+              - textbox "Add subtask checklist" [ref=e154]
+              - button "＋" [ref=e155] [cursor=pointer]
+            - generic [ref=e156]:
+              - generic [ref=e157]:
+                - generic [ref=e158]: "- Integrate Eisenhower Priority Matrix Grid"
+                - button "×" [ref=e159] [cursor=pointer]
+              - generic [ref=e160]:
+                - generic [ref=e161]: "- Implement Drag and Drop in Today's Plan"
+                - button "×" [ref=e162] [cursor=pointer]
+              - generic [ref=e163]:
+                - generic [ref=e164]: "- Design SVG Timeline charts"
+                - button "×" [ref=e165] [cursor=pointer]
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: "Phase 3: Verify Responsiveness & Sound Celebrations"
+              - button "×" [ref=e169] [cursor=pointer]
+            - generic [ref=e170]:
+              - textbox "Add subtask checklist" [ref=e171]
+              - button "＋" [ref=e172] [cursor=pointer]
+            - generic [ref=e173]:
+              - generic [ref=e174]:
+                - generic [ref=e175]: "- Add soft completes chime audio"
+                - button "×" [ref=e176] [cursor=pointer]
+              - generic [ref=e177]:
+                - generic [ref=e178]: "- Verify Light/Dark theme density controls"
+                - button "×" [ref=e179] [cursor=pointer]
+      - generic [ref=e180]:
+        - generic [ref=e181]: Match moods
+        - generic [ref=e182]:
+          - generic [ref=e183] [cursor=pointer]: "#focused"
+          - generic [ref=e184] [cursor=pointer]: "#creative"
+          - generic [ref=e185] [cursor=pointer]: "#calm"
+          - generic [ref=e186] [cursor=pointer]: "#social"
+          - generic [ref=e187] [cursor=pointer]: "#curious"
+          - generic [ref=e188] [cursor=pointer]: "#restless"
+          - generic [ref=e189] [cursor=pointer]: "#tired"
+          - generic [ref=e190] [cursor=pointer]: "#scattered"
+          - generic [ref=e191] [cursor=pointer]: "#productive"
+          - generic [ref=e192] [cursor=pointer]: "#mindful"
+          - generic [ref=e193] [cursor=pointer]: "#inspired"
+      - generic [ref=e194]:
+        - button "Save Focus Changes" [ref=e195] [cursor=pointer]
+        - button "Delete" [ref=e196] [cursor=pointer]
+  - generic [ref=e198]:
+    - generic [ref=e199]:
+      - heading "Daily Mood Check-in" [level=2] [ref=e200]
+      - button "×" [ref=e201] [cursor=pointer]
+    - paragraph [ref=e202]: How is your mind feeling right now? This ranks tasks in priority of mood-fit.
+    - generic [ref=e203]:
+      - button "🎯 Focused" [ref=e204] [cursor=pointer]:
+        - generic [ref=e205]: 🎯
+        - generic [ref=e206]: Focused
+      - button "🎨 Creative" [ref=e207] [cursor=pointer]:
+        - generic [ref=e208]: 🎨
+        - generic [ref=e209]: Creative
+      - button "🌊 Calm" [ref=e210] [cursor=pointer]:
+        - generic [ref=e211]: 🌊
+        - generic [ref=e212]: Calm
+      - button "💬 Social" [ref=e213] [cursor=pointer]:
+        - generic [ref=e214]: 💬
+        - generic [ref=e215]: Social
+      - button "🔍 Curious" [ref=e216] [cursor=pointer]:
+        - generic [ref=e217]: 🔍
+        - generic [ref=e218]: Curious
+      - button "⚡ Restless" [ref=e219] [cursor=pointer]:
+        - generic [ref=e220]: ⚡
+        - generic [ref=e221]: Restless
+      - button "💤 Tired" [ref=e222] [cursor=pointer]:
+        - generic [ref=e223]: 💤
+        - generic [ref=e224]: Tired
+      - button "🌀 Scattered" [ref=e225] [cursor=pointer]:
+        - generic [ref=e226]: 🌀
+        - generic [ref=e227]: Scattered
+    - generic [ref=e228]:
+      - generic [ref=e229]:
+        - generic [ref=e230]: Energy Level
+        - generic [ref=e231]: 3 / 5
+      - slider [ref=e232]: "3"
+      - generic [ref=e233]:
+        - generic [ref=e234]: Exhausted
+        - generic [ref=e235]: Wired
+    - generic [ref=e236]:
+      - generic [ref=e237]: Mind tags
+      - generic [ref=e238]:
+        - generic [ref=e239] [cursor=pointer]: "#productive"
+        - generic [ref=e240] [cursor=pointer]: "#mindful"
+        - generic [ref=e241] [cursor=pointer]: "#inspired"
+      - textbox "Add custom mind tag + Press Enter" [ref=e242]
+    - button "Record State & Continue" [ref=e243] [cursor=pointer]
