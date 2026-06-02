@@ -3,11 +3,12 @@ import { useAppData } from "../context/AppContext";
 import SubtaskPreviewModal from "./SubtaskPreviewModal";
 
 export default function NewTaskModal({ open, editTask, onClose }) {
-  const { customMoodTags, apiFetch } = useAppData();
-  
+  const { customMoodTags, apiFetch, tasks } = useAppData();
+
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [showSubtaskPreview, setShowSubtaskPreview] = useState(false);
+  const [subtasksAppliedAt, setSubtasksAppliedAt] = useState(null);
 
   // Core Fields
   const [title, setTitle] = useState("");
@@ -82,6 +83,25 @@ export default function NewTaskModal({ open, editTask, onClose }) {
       setPhaseSubs({});
     }
   }, [editTask, open]);
+
+  // Re-sync template data from context after apply_subtasks updates it
+  useEffect(() => {
+    if (!subtasksAppliedAt || !editTask) return;
+    const updated = tasks.find(t => t.id === editTask.id);
+    if (!updated) return;
+    if (updated.template === "project" && updated.project) {
+      setPhases(updated.project.phases || []);
+      const subsMap = {};
+      updated.project.phases.forEach(p => {
+        subsMap[p.id] = (p.subs || []).map(s => s.label);
+      });
+      setPhaseSubs(subsMap);
+    } else if (updated.template === "book" && updated.book) {
+      setChapters(updated.book.chapters || []);
+    } else if (updated.template === "skill" && updated.skill) {
+      setDrills(updated.skill.drills || []);
+    }
+  }, [subtasksAppliedAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleMoodTag = (tag) => {
     if (selectedMoods.includes(tag)) {
@@ -515,6 +535,10 @@ export default function NewTaskModal({ open, editTask, onClose }) {
         <SubtaskPreviewModal
           task={editTask}
           onClose={() => setShowSubtaskPreview(false)}
+          onApplied={() => {
+            setSubtasksAppliedAt(Date.now());
+            setShowSubtaskPreview(false);
+          }}
         />
       )}
     </div>

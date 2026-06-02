@@ -1493,6 +1493,10 @@ textarea {
     opacity: 0.6;
   }
 }
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.2; }
+}
 .chat-pill {
   position: fixed;
   bottom: 22px;

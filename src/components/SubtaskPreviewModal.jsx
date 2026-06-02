@@ -8,7 +8,7 @@ import { useAppData } from "../context/AppContext";
  *   task         — full task object
  *   onClose      — () => void
  */
-export default function SubtaskPreviewModal({ task, onClose }) {
+export default function SubtaskPreviewModal({ task, onClose, onApplied }) {
   const { apiFetch, profile } = useAppData();
 
   const hasProfile = !!profile?.traits?.onboardingComplete;
@@ -106,6 +106,7 @@ export default function SubtaskPreviewModal({ task, onClose }) {
         },
       },
     });
+    onApplied?.();
     onClose();
   };
 
@@ -250,7 +251,17 @@ export default function SubtaskPreviewModal({ task, onClose }) {
         {generating && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[70, 55, 80, 60].map((w, i) => (
-              <div key={i} style={{ height: 14, width: `${w}%`, background: "var(--line-soft)", borderRadius: 4, opacity: 0.6 }} />
+              <div
+                key={i}
+                style={{
+                  height: 14,
+                  width: `${w}%`,
+                  background: "var(--line-soft)",
+                  borderRadius: 4,
+                  animation: "skeleton-pulse 1.4s ease-in-out infinite",
+                  animationDelay: `${i * 0.18}s`,
+                }}
+              />
             ))}
           </div>
         )}
