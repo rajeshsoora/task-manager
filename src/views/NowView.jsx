@@ -37,7 +37,7 @@ const COACH_GREETING = {
 };
 
 export default function NowView({ onSetActive, onEdit, onGoToToday }) {
-  const { user, tasks, activeTaskId, currentMood, lastCheckInAt, customMoodTags, apiFetch, events, lastCheckInEnergy } = useAppData();
+  const { user, tasks, activeTaskId, currentMood, lastCheckInAt, customMoodTags, apiFetch, events, lastCheckInEnergy, profile } = useAppData();
   
   const todayStr = new Date().toISOString().slice(0, 10);
   const { plan } = useDailyPlan(todayStr);
@@ -98,6 +98,7 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
         currentMood,
         energy: lastCheckInEnergy,
         recentEvents,
+        profile: profile?.traits?.onboardingComplete ? profile : null,
       });
       setChatLogs((prev) => [...prev, { sender: "assistant", text: reply }]);
     } catch (err) {
