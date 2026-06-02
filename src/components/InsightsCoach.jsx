@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { sendInsightsMessage, writeSessionSummary } from "../lib/gemini";
 import { useAppData } from "../context/AppContext";
 
@@ -73,7 +73,7 @@ export default function InsightsCoach({ onClose }) {
       const history = newMessages.filter(m => m.sender !== "coach" || newMessages.indexOf(m) > 0);
       const reply = await sendInsightsMessage(text, history.slice(0, -1), profileContext);
       setMessages(prev => [...prev, { sender: "coach", text: reply }]);
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { sender: "coach", text: "Sorry, I had trouble responding. Try again." }]);
     } finally {
       setLoading(false);

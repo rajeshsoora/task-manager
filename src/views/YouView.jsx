@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAppData } from "../context/AppContext";
 import { computePatterns, isMonthOld, currentYearMonth, currentYearQuarter } from "../lib/profileUtils";
 import { generateTuneQuestions, updateProfileFromTune, compressToMonthLog, compressToQuarterLog } from "../lib/gemini";
@@ -102,14 +102,6 @@ export default function YouView() {
   const [compressing, setCompressing] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(false);
 
-  useEffect(() => {
-    if (!profile.loaded || !profile.traits?.onboardingComplete) return;
-    const freshPatterns = computePatterns(events, tasks);
-    saveProfilePatterns(freshPatterns);
-
-    runCompressionIfNeeded();
-  }, [profile.loaded]);
-
   const runCompressionIfNeeded = async () => {
     try {
       setCompressing(true);
@@ -142,6 +134,16 @@ export default function YouView() {
       setCompressing(false);
     }
   };
+
+  useEffect(() => {
+    if (!profile.loaded || !profile.traits?.onboardingComplete) return;
+    const freshPatterns = computePatterns(events, tasks);
+    saveProfilePatterns(freshPatterns);
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    runCompressionIfNeeded();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.loaded]);
 
   const handleTuneStart = async () => {
     setTuneLoading(true);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { scoreOnboardingAnswers } from "../lib/gemini";
 import { useAppData } from "../context/AppContext";
 
