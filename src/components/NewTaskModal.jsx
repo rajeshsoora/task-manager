@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAppData } from "../context/AppContext";
+import SubtaskPreviewModal from "./SubtaskPreviewModal";
 
 export default function NewTaskModal({ open, editTask, onClose }) {
   const { customMoodTags, apiFetch } = useAppData();
   
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [showSubtaskPreview, setShowSubtaskPreview] = useState(false);
 
   // Core Fields
   const [title, setTitle] = useState("");
@@ -360,6 +362,21 @@ export default function NewTaskModal({ open, editTask, onClose }) {
             </select>
           </div>
 
+          {/* Generate subtasks button — hidden for idle template */}
+          {template !== "idle" && editTask && (
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="btn btn-sm"
+                disabled={busy}
+                onClick={() => setShowSubtaskPreview(true)}
+                style={{ fontSize: 11 }}
+              >
+                ✦ Generate subtasks
+              </button>
+            </div>
+          )}
+
           {/* Chapters checklist Builder (Book Template) */}
           {template === "book" && (
             <div style={{ border: "1px solid var(--line)", borderRadius: 8, padding: 12, background: "var(--panel-2)" }}>
@@ -494,6 +511,12 @@ export default function NewTaskModal({ open, editTask, onClose }) {
           </div>
         </form>
       </div>
+      {showSubtaskPreview && editTask && (
+        <SubtaskPreviewModal
+          task={editTask}
+          onClose={() => setShowSubtaskPreview(false)}
+        />
+      )}
     </div>
   );
 }
