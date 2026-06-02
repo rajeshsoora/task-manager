@@ -276,6 +276,17 @@ export default function TodayView({ onSetActive }) {
                       {t.template && <span className="task-template-pill" style={{ marginLeft: 6 }}>{t.template}</span>}
                     </span>
 
+                    {t.energy !== undefined && (
+                      <span style={{ display: 'flex', gap: 2 }} title={`Energy: ${t.energy}/5`}>
+                        {[1,2,3,4,5].map(i => (
+                          <span key={i} style={{
+                            width: 5, height: 5, borderRadius: '50%',
+                            background: i <= t.energy ? 'var(--accent)' : '#333'
+                          }} />
+                        ))}
+                      </span>
+                    )}
+
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       {!completed && (
                         <button className="btn btn-sm btn-ghost" onClick={() => onSetActive(t.id)}>
