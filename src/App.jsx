@@ -8,6 +8,7 @@ const TodayView = lazy(() => import("./views/TodayView"));
 const TasksView = lazy(() => import("./views/TasksView"));
 const MatrixView = lazy(() => import("./views/MatrixView"));
 const TimelineView = lazy(() => import("./views/TimelineView"));
+const YouView = lazy(() => import("./views/YouView"));
 
 // Modals
 import NewTaskModal from "./components/NewTaskModal";
@@ -103,6 +104,10 @@ function Sidebar({ view, setView, tasks, activeTaskId, onKindFilter, onNew, draw
           <span className="nav-dot"></span>
           <span>Timeline</span>
         </button>
+        <button className="nav-item" data-active={view === "you"} onClick={() => handleNav("you")}>
+          <span className="nav-dot"></span>
+          <span>You</span>
+        </button>
       </div>
 
       <div className="nav-label">Categories</div>
@@ -135,6 +140,7 @@ function BottomNav({ view, setView }) {
     { id: "tasks", label: "Tasks", icon: "📝" },
     { id: "matrix", label: "Matrix", icon: "🔲" },
     { id: "timeline", label: "Timeline", icon: "📈" },
+    { id: "you", label: "You", icon: "🧠" },
   ];
 
   return (
@@ -512,6 +518,7 @@ function AppLayout() {
     tasks: "All tasks",
     matrix: "Priority matrix",
     timeline: "Timeline",
+    you: "You",
   };
 
   return (
@@ -594,6 +601,7 @@ function AppLayout() {
                 isMobile={isMobile}
               />
             )}
+            {view === "you" && <YouView />}
           </Suspense>
         </div>
 
