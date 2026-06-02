@@ -229,3 +229,163 @@ Return JSON only — no markdown:
 
   return { traits: updatedTraits, contextNarrative: parsed.contextNarrative };
 }
+
+/**
+ * Builds the system prompt for the Insights coach (profile-level coach).
+ * This is different from the task-focused NowView coach.
+ */
+function buildInsightsSystemPrompt({ traits, patterns, context, recentMemory }) {
+  const traitLines = traits
+    ? Object.entries(traits)
+        .filter(([k]) => ["conscientiousness", "perfectionism", "emotionalRegulation", "timePerspective", "impulsivity", "selfEfficacy"].includes(k))
+        .map(([k, v]) => `- ${k}: ${v.score}/100`)
+        .join("\n")
+    : "Profile not yet established.";
+
+  const patternLines = patterns
+    ? [
+        `- Completion rate: ${Math.round((patterns.completionRate?.rate || 0) * 100)}% (${patterns.completionRate?.trend || "unknown"})`,
+        `- Task switches: ${patterns.taskSwitchFrequency?.rate || 0}/week (${patterns.taskSwitchFrequency?.trend || "unknown"})`,
+        `- Drift sessions: ${patterns.driftFrequency?.perDay || 0}/day (${patterns.driftFrequency?.trend || "unknown"})`,
+        patterns.peakEnergyKind ? `- Strongest task kind: ${patterns.peakEnergyKind}` : "",
+        patterns.avoidanceKind  ? `- Most-avoided task kind: ${patterns.avoidanceKind}` : "",
+      ].filter(Boolean).join("\n")
+    : "No behavioral patterns recorded yet.";
+
+  const memorySection = recentMemory?.trim()
+    ? `Recent history:\n${recentMemory}`
+    : "No prior session history.";
+
+  return `You are a personal growth coach embedded in a task manager app called Mind Manager. You are having a one-on-one session with the user about *who they are* — not about a specific task. Your role is to help them understand their patterns, reframe unhelpful beliefs, and make progress on becoming the person who finishes what they start.
+
+User's psychological profile (trait scores 0-100, higher = stronger capacity):
+${traitLines}
+
+Behavioral patterns (last 30 days):
+${patternLines}
+
+Context about this user:
+${context?.narrative || "No context established yet."}
+
+${memorySection}
+
+Guidelines:
+- Keep responses 2-4 sentences unless the user asks for more depth.
+- Open the session by referencing something specific from their profile or recent history — not a generic greeting.
+- Use past-tense framing ("you've been..." not "you are...") — traits are changeable.
+- Never use identity labels like "procrastinator", "perfectionist", "avoider". Use behavior descriptions.
+- Pair any pattern observation with an actionable reframe or next step.
+- If the user shares something new about themselves, incorporate it into the conversation naturally.
+- Be warm but direct. This is a focused session, not therapy.`;
+}
+
+/**
+ * Sends a message in the Insights coach session.
+ */
+export async function sendInsightsMessage(userMessage, chatHistory, profileContext) {
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: buildInsightsSystemPrompt(profileContext),
+  });
+
+  const history = chatHistory.map(msg => ({
+    role: msg.sender === "user" ? "user" : "model",
+    parts: [{ text: msg.text }],
+  }));
+
+  const chat = model.startChat({ history });
+  const result = await chat.sendMessage(userMessage);
+  return result.response.text();
+}
+
+/**
+ * Writes a session summary at the end of an Insights coach session.
+ * @param {Array<{sender: string, text: string}>} messages - Full session messages
+ * @param {string} currentNarrative - Current context narrative
+ * @returns {Promise<string>} - Summary text to store
+ */
+export async function writeSessionSummary(messages, currentNarrative) {
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const transcript = messages
+    .map(m => `${m.sender === "user" ? "User" : "Coach"}: ${m.text}`)
+    .join("\n");
+
+  const prompt = `You are summarizing a coaching session from a personal productivity app.
+
+Current user context: "${currentNarrative || "No prior context."}"
+
+Session transcript:
+${transcript}
+
+Write a concise summary (3-5 sentences) capturing:
+1. What the user shared about themselves or their situation
+2. Any new patterns or insights that emerged
+3. What the coach observed or suggested
+4. Any profile updates warranted (shifts in trait understanding)
+
+Use second person ("The user shared...", "They expressed..."). Past tense. No identity labels.
+Return only the summary text — no JSON, no headers.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+}
+
+/**
+ * Compresses multiple session summaries into a single month log.
+ * @param {Array<{summary: string, createdAt: string}>} sessions
+ * @returns {Promise<string>} - Month log text
+ */
+export async function compressToMonthLog(sessions) {
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const sessionTexts = sessions
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    .map((s, i) => `Session ${i + 1} (${new Date(s.createdAt).toLocaleDateString()}): ${s.summary}`)
+    .join("\n\n");
+
+  const prompt = `You are compressing multiple coaching session summaries into a single monthly log for a user's productivity app.
+
+Sessions from this month:
+${sessionTexts}
+
+Write a comprehensive monthly summary (4-7 sentences) that:
+1. Captures the main themes and patterns that emerged this month
+2. Notes any significant shifts or progress the user made
+3. Preserves important context that should inform future coaching
+4. Highlights any recurring obstacles or breakthroughs
+
+Second person ("The user..."). Past tense. No identity labels. Return only the summary text.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+}
+
+/**
+ * Compresses multiple month logs into a quarterly summary.
+ * @param {Array<{id: string, summary: string, createdAt: string}>} monthLogs
+ * @returns {Promise<string>} - Quarter log text
+ */
+export async function compressToQuarterLog(monthLogs) {
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const logTexts = monthLogs
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(l => `${l.id}: ${l.summary}`)
+    .join("\n\n");
+
+  const prompt = `You are compressing three months of coaching logs into a quarterly summary for a user's productivity app.
+
+Monthly logs:
+${logTexts}
+
+Write a concise quarterly summary (4-6 sentences) that:
+1. Identifies the most significant long-term patterns and themes
+2. Notes meaningful progress or persistent challenges over the quarter
+3. Preserves the essential context needed to coach this person effectively going forward
+
+Second person. Past tense. No identity labels. Return only the summary text.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+}
