@@ -17,7 +17,9 @@ export default function NewTaskModal({ open, editTask, onClose }) {
   const [energy, setEnergy] = useState(3);
   const [cadence, setCadence] = useState("once");
   const [selectedMoods, setSelectedMoods] = useState([]);
-  
+  const [scheduledDate, setScheduledDate] = useState("")
+  const [dueDate, setDueDate] = useState("")
+
   // Template States
   const [template, setTemplate] = useState("none"); // 'none', 'book', 'skill', 'project', 'idle'
   
@@ -68,6 +70,8 @@ export default function NewTaskModal({ open, editTask, onClose }) {
         });
         setPhaseSubs(subsMap);
       }
+      setScheduledDate(editTask.scheduledDate || "")
+      setDueDate(editTask.dueDate || "")
     } else {
       // Clear fields
       setTitle("");
@@ -81,6 +85,8 @@ export default function NewTaskModal({ open, editTask, onClose }) {
       setDrills([]);
       setPhases([]);
       setPhaseSubs({});
+      setScheduledDate("")
+      setDueDate("")
     }
   }, [editTask, open]);
 
@@ -200,6 +206,8 @@ export default function NewTaskModal({ open, editTask, onClose }) {
       cadence,
       moods: selectedMoods,
       template: template === "none" ? null : template,
+      scheduledDate: scheduledDate || null,
+      dueDate: dueDate || null,
     };
 
     if (template === "book") {
@@ -263,6 +271,11 @@ export default function NewTaskModal({ open, editTask, onClose }) {
   };
 
   if (!open) return null;
+
+  const todayStr = new Date().toISOString().slice(0,10)
+  const dayLoad = scheduledDate
+    ? tasks.filter(t => t.scheduledDate === scheduledDate && (!editTask || t.id !== editTask.id)).length
+    : 0
 
   return (
     <div className="modal-backdrop">
@@ -516,6 +529,46 @@ export default function NewTaskModal({ open, editTask, onClose }) {
                 </span>
               ))}
             </div>
+          </div>
+
+          {/* Schedule */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <label className="h-eyebrow">Schedule <span style={{ color: 'var(--faint)', textTransform: 'none', fontWeight: 400 }}>(optional)</span></label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--ink-2)' }}>Doing this on</span>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={scheduledDate}
+                  min={todayStr}
+                  onChange={e => setScheduledDate(e.target.value)}
+                  disabled={busy}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--ink-2)' }}>Deadline</span>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                  disabled={busy}
+                />
+              </div>
+            </div>
+            {scheduledDate && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--ink-2)' }}>Day load:</span>
+                <span style={{
+                  fontSize: 11,
+                  color: dayLoad >= 3 ? 'var(--accent)' : dayLoad === 2 ? '#f59e0b' : 'var(--ink-2)',
+                  fontWeight: dayLoad >= 2 ? 600 : 400
+                }}>
+                  {dayLoad} task{dayLoad !== 1 ? 's' : ''} already planned
+                </span>
+              </div>
+            )}
           </div>
 
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
