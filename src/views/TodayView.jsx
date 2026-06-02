@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useAppData, useDailyPlan, formatDate, getYesterdayDate } from "../context/AppContext";
 
 export default function TodayView({ onSetActive }) {
-  const { tasks, dailyPlans, apiFetch, activeTaskId, events } = useAppData();
+  const { tasks, dailyPlans, apiFetch, activeTaskId } = useAppData();
   
   const todayStr = formatDate(new Date());
   const { plan, loading } = useDailyPlan(todayStr);
