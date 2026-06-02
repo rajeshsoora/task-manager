@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAppData, useAuth, useDailyPlan } from "../context/AppContext";
+import { useAppData, useDailyPlan } from "../context/AppContext";
 import { sendMessage } from "../lib/gemini.js";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 // Score ranking algorithm based on user mood and energy
 function rankTasks(tasks, activeTaskId, currentMood, customMoodTags, energyLevel) {
@@ -35,8 +37,7 @@ const COACH_GREETING = {
 };
 
 export default function NowView({ onSetActive, onEdit, onGoToToday }) {
-  const { user } = useAuth();
-  const { tasks, activeTaskId, currentMood, lastCheckInAt, customMoodTags, apiFetch, events, lastCheckInEnergy } = useAppData();
+  const { user, tasks, activeTaskId, currentMood, lastCheckInAt, customMoodTags, apiFetch, events, lastCheckInEnergy } = useAppData();
   
   const todayStr = new Date().toISOString().slice(0, 10);
   const { plan } = useDailyPlan(todayStr);
@@ -45,15 +46,7 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
   
   // Chatbot State
   const [chatInput, setChatInput] = useState("");
-  const [chatLogs, setChatLogs] = useState(() => {
-    if (!activeTaskId) return [COACH_GREETING];
-    try {
-      const saved = localStorage.getItem(`mindCoach-${activeTaskId}`);
-      return saved ? JSON.parse(saved) : [COACH_GREETING];
-    } catch {
-      return [COACH_GREETING];
-    }
-  });
+  const [chatLogs, setChatLogs] = useState([COACH_GREETING]);
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef(null);
 
@@ -67,29 +60,25 @@ export default function NowView({ onSetActive, onEdit, onGoToToday }) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatLogs]);
 
-  // Reset and reload chat when the active task changes
   useEffect(() => {
-    if (!activeTaskId) {
+    if (!activeTaskId || !user) {
       setChatLogs([COACH_GREETING]);
       return;
     }
-    try {
-      const saved = localStorage.getItem(`mindCoach-${activeTaskId}`);
-      setChatLogs(saved ? JSON.parse(saved) : [COACH_GREETING]);
-    } catch {
-      setChatLogs([COACH_GREETING]);
-    }
-  }, [activeTaskId]);
+    getDoc(doc(db, "users", user.uid, "chat_history", activeTaskId)).then(snap => {
+      const msgs = snap.data()?.messages;
+      setChatLogs(msgs?.length ? msgs : [COACH_GREETING]);
+    });
+  }, [activeTaskId, user]);
 
-  // Persist chat logs whenever they update
   useEffect(() => {
-    if (!activeTaskId || chatLogs.length <= 1) return; // Don't persist if only greeting
-    try {
-      localStorage.setItem(`mindCoach-${activeTaskId}`, JSON.stringify(chatLogs));
-    } catch {
-      // localStorage full or unavailable — fail silently
-    }
-  }, [chatLogs, activeTaskId]);
+    if (!activeTaskId || !user || chatLogs.length <= 1) return;
+    setDoc(
+      doc(db, "users", user.uid, "chat_history", activeTaskId),
+      { messages: chatLogs },
+      { merge: true }
+    );
+  }, [chatLogs, activeTaskId, user]);
 
   // Handle cognitive coach chatbot responses
   const handleChatSubmit = async (e) => {
