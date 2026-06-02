@@ -561,6 +561,69 @@ export function AppDataProvider({ children }) {
         break;
       }
 
+      case "apply_subtasks": {
+        const task = tasks.find(t => t.id === action.taskId);
+        if (!task || !uid) break;
+
+        const now = Date.now();
+        let newTemplateType = action.templateType; // "project", "book", or "skill"
+        let newTemplateData;
+
+        if (newTemplateType === "project") {
+          const existingPhases = task.project?.phases || [];
+          const generatedPhases = (action.data.phases || []).map((p, pi) => ({
+            id: `phase-${now}-${pi}`,
+            title: p.title,
+            status: pi === 0 && existingPhases.length === 0 ? "doing" : "todo",
+            subs: (p.subs || []).map((label, si) => ({
+              id: `sub-${now}-${pi}-${si}`,
+              label,
+              done: false,
+            })),
+          }));
+          newTemplateData = { phases: [...existingPhases, ...generatedPhases] };
+        } else if (newTemplateType === "book") {
+          const existingChapters = task.book?.chapters || [];
+          const generatedChapters = (action.data.chapters || []).map((title, ci) => ({
+            id: `ch-${now}-${ci}`,
+            title,
+            status: "unread",
+            note: "",
+          }));
+          newTemplateData = { chapters: [...existingChapters, ...generatedChapters] };
+        } else if (newTemplateType === "skill") {
+          const existingDrills = task.skill?.drills || [];
+          const generatedDrills = (action.data.drills || []).map((label, di) => ({
+            id: `drill-${now}-${di}`,
+            label,
+            level: 1,
+          }));
+          newTemplateData = {
+            drills: [...existingDrills, ...generatedDrills],
+            recent: task.skill?.recent || [],
+          };
+        } else {
+          break;
+        }
+
+        const updatedTemplate = task.template || newTemplateType;
+
+        const merged = {
+          ...task,
+          template: updatedTemplate,
+          [newTemplateType]: newTemplateData,
+          lastTouched: new Date().toISOString(),
+        };
+
+        setTasks(prev => prev.map(t => t.id === action.taskId ? merged : t));
+        await updateDoc(doc(db, "users", uid, "tasks", action.taskId), {
+          template: updatedTemplate,
+          templateData: newTemplateData,
+          lastTouched: merged.lastTouched,
+        });
+        break;
+      }
+
       default:
         break;
     }
