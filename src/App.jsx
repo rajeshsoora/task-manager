@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import confetti from "canvas-confetti";
 import { AppDataProvider, useAuth, useAppData, useTasks, useMood, formatDate } from "./context/AppContext";
 
@@ -13,6 +13,7 @@ const YouView = lazy(() => import("./views/YouView"));
 // Modals
 import NewTaskModal from "./components/NewTaskModal";
 import AuthGate from "./components/AuthGate";
+import { LEVEL_THRESHOLDS } from "./lib/profileUtils";
 
 // Web Audio API Synthesized Premium Chime
 function playRewardChime() {
@@ -417,10 +418,115 @@ function TopbarMoodBubble({ currentMood, onClick }) {
   );
 }
 
+// XP Pop-up celebration overlay
+function XPPopup({ data, onDone }) {
+  const { xp } = useAppData();
+  const curLvlXP = LEVEL_THRESHOLDS[data.newLevel - 1] ?? 0;
+  const nextLvlXP = LEVEL_THRESHOLDS[data.newLevel] ?? LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 2];
+  const progress = nextLvlXP === Infinity ? 1 : Math.min(1, (xp - curLvlXP) / (nextLvlXP - curLvlXP));
+
+  useEffect(() => {
+    const t = setTimeout(onDone, 2800);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const isLevelUp = data.didLevelUp;
+  const isGoodDopamine = data.isGoodDopamine && !isLevelUp;
+
+  const bgStyle = isLevelUp
+    ? { background: "linear-gradient(160deg,#f0fdf6 0%,#fff 55%)", borderColor: "rgba(5,150,105,0.25)" }
+    : isGoodDopamine
+    ? { background: "linear-gradient(160deg,#fff8f2 0%,#fff 55%)", borderColor: "rgba(251,146,60,0.25)" }
+    : { background: "#fff", borderColor: "#ece9e4" };
+
+  const glowColor = isLevelUp ? "rgba(5,150,105,0.1)" : "rgba(251,146,60,0.12)";
+
+  return (
+    <div
+      onClick={onDone}
+      style={{
+        position: "fixed", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center",
+        paddingBottom: "clamp(80px, 15vh, 140px)", zIndex: 9000, pointerEvents: "auto",
+        animation: "xpFadeIn 0.25s ease",
+      }}
+    >
+      <div style={{
+        ...bgStyle,
+        border: `1px solid ${bgStyle.borderColor}`,
+        borderRadius: 20,
+        padding: "22px 24px 20px",
+        textAlign: "center",
+        width: "min(340px, 88vw)",
+        boxShadow: "0 8px 40px -8px rgba(0,0,0,0.18), 0 1px 0 rgba(0,0,0,0.04)",
+        position: "relative",
+        overflow: "hidden",
+        animation: "xpSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+      }}>
+        {/* ambient glow */}
+        <div style={{
+          position: "absolute", top: -30, right: -30, width: 130, height: 130,
+          borderRadius: "50%", background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }} />
+
+        {/* icon circle */}
+        <div style={{
+          width: 44, height: 44, borderRadius: "50%",
+          background: isLevelUp ? "rgba(5,150,105,0.1)" : isGoodDopamine ? "rgba(251,146,60,0.1)" : "var(--panel-2,#f5f3f0)",
+          border: `1px solid ${isLevelUp ? "rgba(5,150,105,0.2)" : isGoodDopamine ? "rgba(251,146,60,0.2)" : "transparent"}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 20, margin: "0 auto 14px",
+        }}>
+          {isLevelUp ? "✦" : isGoodDopamine ? "⚡" : "✓"}
+        </div>
+
+        {isLevelUp ? (
+          <>
+            <div style={{
+              display: "inline-block", fontSize: 10, fontWeight: 800, letterSpacing: "0.1em",
+              textTransform: "uppercase", color: "#059669",
+              background: "rgba(5,150,105,0.1)", borderRadius: 20, padding: "3px 10px", marginBottom: 8,
+            }}>Level up</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#1c1917", letterSpacing: "-0.04em", marginBottom: 4 }}>
+              {data.newLevelName}
+            </div>
+            <div style={{ fontSize: 12, color: "#78716c" }}>Level {data.newLevel} · keep the momentum</div>
+          </>
+        ) : (
+          <>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#1c1917", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1.25 }}>
+              {data.title || data.text}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#fb923c", letterSpacing: "-0.02em", marginBottom: 5 }}>
+              +{data.xpEarned} XP{isGoodDopamine ? " ⚡" : ""}
+            </div>
+            <div style={{ fontSize: 11, color: "#a8a29e", marginBottom: 10 }}>
+              {xp.toLocaleString()} XP · {data.newLevelName}
+            </div>
+            <div style={{ height: 4, background: "#f0ede8", borderRadius: 2, overflow: "hidden", margin: "0 4px" }}>
+              <div style={{
+                height: "100%", borderRadius: 2,
+                background: "linear-gradient(90deg,#ea580c,#fb923c,#fbbf24)",
+                width: `${Math.round(progress * 100)}%`,
+                transition: "width 0.6s ease",
+              }} />
+            </div>
+          </>
+        )}
+      </div>
+      <style>{`
+        @keyframes xpFadeIn { from { opacity:0 } to { opacity:1 } }
+        @keyframes xpSlideUp { from { transform:translateY(30px) scale(0.95); opacity:0 } to { transform:translateY(0) scale(1); opacity:1 } }
+      `}</style>
+    </div>
+  );
+}
+
 // Main Scaffold Layout
 function AppLayout() {
   const { user, signIn, signOut } = useAuth();
   const { tasks, activeTaskId, currentMood, lastCheckInAt, tweaks, setTweak, apiFetch } = useAppData();
+  const [xpPopup, setXpPopup] = useState(null);
   
   const [view, setView] = useState("now");
   const [filter, setFilter] = useState("open");
@@ -483,6 +589,7 @@ function AppLayout() {
       if (res?.celebration) {
         if (tweaks.celebrations) triggerConfetti();
         if (tweaks.sound) playRewardChime();
+        if (res.celebration.xpEarned) setXpPopup(res.celebration);
       }
       return res;
     } catch (err) {
@@ -633,6 +740,7 @@ function AppLayout() {
           onClose={() => setMoodModalOpen(false)}
         />
       )}
+      {xpPopup && <XPPopup data={xpPopup} onDone={() => setXpPopup(null)} />}
     </div>
   );
 }

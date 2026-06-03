@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAppData, useDailyPlan, formatDate, getYesterdayDate } from "../context/AppContext";
+import { computeFulfillmentScore, getLevelFromXP, LEVEL_THRESHOLDS } from "../lib/profileUtils";
 
 export default function TodayView({ onSetActive }) {
-  const { tasks, dailyPlans, apiFetch, activeTaskId } = useAppData();
+  const { tasks, dailyPlans, apiFetch, activeTaskId, profile } = useAppData();
   
   const todayStr = formatDate(new Date());
   const { plan, loading } = useDailyPlan(todayStr);
@@ -47,6 +48,20 @@ export default function TodayView({ onSetActive }) {
   const openTasks = useMemo(() => {
     return tasks.filter((t) => !t.done && !plannedSet.has(t.id));
   }, [tasks, plannedSet]);
+
+  const chaseTask = useMemo(() => {
+    const candidates = [...plannedTasks, ...openTasks].filter((t) => !t.done);
+    if (!candidates.length) return null;
+    const scored = candidates.map((t) => ({
+      task: t,
+      score: computeFulfillmentScore(t, profile?.patterns, profile?.traits),
+    }));
+    const best = scored.sort((a, b) => b.score - a.score)[0];
+    if (!best || best.score < 60) return null;
+    const baseXP = (best.task.energy || 1) * 20;
+    const xpEarned = best.score >= 60 ? Math.round(baseXP * 1.5) : baseXP;
+    return { task: best.task, score: best.score, xpEarned };
+  }, [plannedTasks, openTasks, profile]);
 
   const completedTodayCount = useMemo(() => {
     return plannedTasks.filter((t) => t.done || t.lastTouched?.slice(0, 10) === todayStr).length;
@@ -270,6 +285,77 @@ export default function TodayView({ onSetActive }) {
         <p style={{ fontSize: 12, color: "var(--accent)", marginTop: 12, marginBottom: 0 }}>
           {errorMsg}
         </p>
+      )}
+
+      {chaseTask && (
+        <div
+          onClick={() => onSetActive && onSetActive(chaseTask.task.id)}
+          style={{
+            background: "#1c1917",
+            borderRadius: 16,
+            padding: "16px 18px",
+            marginTop: 20,
+            marginBottom: 4,
+            cursor: "pointer",
+            position: "relative",
+            overflow: "hidden",
+            userSelect: "none",
+          }}
+        >
+          {/* ambient glow */}
+          <div style={{
+            position: "absolute", top: -30, right: -30, width: 130, height: 130,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(251,146,60,0.2) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute", bottom: -24, left: -20, width: 100, height: 100,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(251,146,60,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{ position: "relative" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 5,
+              fontSize: 10, fontWeight: 800, letterSpacing: "0.1em",
+              textTransform: "uppercase", color: "#fb923c", marginBottom: 8,
+            }}>
+              <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                <path d="M4.5 0.75L5.6 3.4L8.25 3.7L6.4 5.55L6.95 8.2L4.5 6.85L2.05 8.2L2.6 5.55L0.75 3.7L3.4 3.4L4.5 0.75Z" fill="#fb923c"/>
+              </svg>
+              Chase this
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 750, color: "#fafaf9", letterSpacing: "-0.03em", lineHeight: 1.2, marginBottom: 5 }}>
+              {chaseTask.task.title}
+            </div>
+            <div style={{ fontSize: 11, color: "#57534e", marginBottom: 14 }}>
+              High effort · historically fulfilling for you
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", gap: 4 }}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} style={{
+                    width: 7, height: 7, borderRadius: "50%",
+                    background: i < (chaseTask.task.energy || 1) ? "#fb923c" : "#2d2926",
+                    boxShadow: i < (chaseTask.task.energy || 1) ? "0 0 5px rgba(251,146,60,0.5)" : "none",
+                  }} />
+                ))}
+              </div>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "rgba(251,146,60,0.14)", border: "1px solid rgba(251,146,60,0.3)",
+                borderRadius: 20, padding: "5px 12px",
+                fontSize: 12, fontWeight: 800, color: "#fb923c", letterSpacing: "-0.01em",
+              }}>
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                  <path d="M4.5 0.75L5.6 3.4L8.25 3.7L6.4 5.55L6.95 8.2L4.5 6.85L2.05 8.2L2.6 5.55L0.75 3.7L3.4 3.4L4.5 0.75Z" fill="#fb923c"/>
+                </svg>
+                +{chaseTask.xpEarned} XP
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="today-grid" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 24, marginTop: 24 }}>

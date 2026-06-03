@@ -1,3 +1,24 @@
+export const LEVEL_THRESHOLDS = [0,100,250,500,900,1400,2000,2750,3650,4700,6000,7500,9200,11100,13200,15500,18000,20700,23600,26700,Infinity];
+export const LEVEL_NAMES = ['Spark','Kindling','Tinkerer','Seeker','Builder','Maker','Focused','Grounded','Consistent','Practitioner','Deep Worker','Craftsman','Momentum','Sharpened','Flow State','Actualized','Architect','Deep Crafter','Master','Flow Architect'];
+
+export function getLevelFromXP(xp) {
+  for (let i = LEVEL_THRESHOLDS.length - 2; i >= 0; i--) {
+    if (xp >= LEVEL_THRESHOLDS[i]) return i + 1;
+  }
+  return 1;
+}
+
+export function computeFulfillmentScore(task, patterns, traits) {
+  let score = (task.energy || 1) * 20;
+  if (patterns?.peakEnergyKind && task.kind === patterns.peakEnergyKind) score += 20;
+  if (patterns?.avoidanceKind && task.kind === patterns.avoidanceKind) score -= 20;
+  const selfEfficacy = traits?.selfEfficacy?.score ?? 50;
+  const conscientiousness = traits?.conscientiousness?.score ?? 50;
+  if (selfEfficacy >= 60 && ['craft','learning','work','music'].includes(task.kind)) score += 15;
+  if (conscientiousness >= 60) score += 10;
+  return Math.max(0, Math.min(100, score));
+}
+
 /**
  * Computes behavioral patterns from event log and task list.
  * Pure JS — no AI. Returns a patterns object for profile/patterns in Firestore.

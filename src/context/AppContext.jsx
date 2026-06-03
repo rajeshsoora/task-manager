@@ -3,6 +3,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndP
 import { collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, query, orderBy, writeBatch } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { createSeedData } from "../lib/seedData";
+import { computeFulfillmentScore, getLevelFromXP, LEVEL_NAMES, LEVEL_THRESHOLDS } from "../lib/profileUtils";
 
 const AppDataContext = createContext(null);
 
@@ -96,6 +97,8 @@ export function AppDataProvider({ children }) {
   const [customMoodTags, setCustomMoodTags] = useState(["productive", "mindful", "inspired"]);
   const [tweaks, setTweaksState] = useState(DEFAULT_TWEAKS);
   const [dailyPlans, setDailyPlans] = useState({});
+  const [xp, setXp] = useState(0);
+  const [level, setLevel] = useState(1);
 
   const DEFAULT_TRAITS = {
     conscientiousness:   { score: 50, history: [] },
@@ -172,6 +175,8 @@ export function AppDataProvider({ children }) {
     const t = p.tweaks || DEFAULT_TWEAKS;
     setTweaksState(t);
     applyTweaksToDOM(t);
+    setXp(p.xp || 0);
+    setLevel(p.level || 1);
 
     setProfile({
       traits: traitsSnap.exists() ? traitsSnap.data() : null,
@@ -317,6 +322,16 @@ export function AppDataProvider({ children }) {
     setEvents(prev => [docToEvent(ref.id, data), ...prev]);
   };
 
+  const awardXP = async (amount, uid, currentXP) => {
+    const newXP = currentXP + amount;
+    const oldLvl = getLevelFromXP(currentXP);
+    const newLvl = getLevelFromXP(newXP);
+    setXp(newXP);
+    setLevel(newLvl);
+    if (uid) await updateDoc(doc(db, "users", uid, "preferences", "prefs"), { xp: newXP, level: newLvl });
+    return { didLevelUp: newLvl > oldLvl, newLevelName: LEVEL_NAMES[newLvl - 1], newLevel: newLvl };
+  };
+
   const signIn = (email, password) => signInWithEmailAndPassword(auth, email, password);
   const signUp = (email, password) => createUserWithEmailAndPassword(auth, email, password);
   const signOut = () => fbSignOut(auth);
@@ -378,7 +393,12 @@ export function AppDataProvider({ children }) {
         if (uid) await updateDoc(doc(db, "users", uid, "tasks", action.taskId), { done: isDone, lastTouched: now });
         await logEvent({ type: "progress", taskId: action.taskId, title: isDone ? `Completed task: ${task.title}` : `Reopened task: ${task.title}`, taskTitle: task.title });
         if (isDone) {
-          celebration = { type: "task_complete", title: task.title, sound: tweaks.sound };
+          const fulfillScore = computeFulfillmentScore(task, profile.patterns, profile.traits);
+          const baseXP = (task.energy || 1) * 20;
+          const xpEarned = fulfillScore >= 60 ? Math.round(baseXP * 1.5) : baseXP;
+          const isGoodDopamine = fulfillScore >= 60;
+          const { didLevelUp, newLevelName, newLevel } = await awardXP(xpEarned, uid, xp);
+          celebration = { type: "task_complete", title: task.title, sound: tweaks.sound, xpEarned, isGoodDopamine, didLevelUp, newLevelName, newLevel };
           if (activeTaskId === action.taskId) {
             setActiveTaskId(null);
             if (uid) await updateDoc(doc(db, "users", uid, "preferences", "prefs"), { activeTaskId: null });
@@ -477,7 +497,8 @@ export function AppDataProvider({ children }) {
         const newTemplateData = { ...task.project, phases };
         setTasks(prev => prev.map(t => t.id === action.taskId ? { ...t, project: newTemplateData } : t));
         if (uid) await updateDoc(doc(db, "users", uid, "tasks", action.taskId), { templateData: newTemplateData });
-        celebration = { type: "phase_complete", text: celebrationMsg, sound: tweaks.sound };
+        const { didLevelUp: phaseLvlUp, newLevelName: phaseLvlName, newLevel: phaseLvl } = await awardXP(75, uid, xp);
+        celebration = { type: "phase_complete", text: celebrationMsg, sound: tweaks.sound, xpEarned: 75, didLevelUp: phaseLvlUp, newLevelName: phaseLvlName, newLevel: phaseLvl };
         await logEvent({ type: "milestone", taskId: action.taskId, title: celebrationMsg, taskTitle: task.title });
         break;
       }
@@ -489,7 +510,10 @@ export function AppDataProvider({ children }) {
         const newTemplateData = { ...task.skill, drills };
         setTasks(prev => prev.map(t => t.id === action.taskId ? { ...t, skill: newTemplateData } : t));
         if (uid) await updateDoc(doc(db, "users", uid, "tasks", action.taskId), { templateData: newTemplateData });
-        if (action.level === 5) celebration = { type: "drill_max", title: "Drill Mastery Set!", sound: tweaks.sound };
+        if (action.level === 5) {
+          const { didLevelUp: drillLvlUp, newLevelName: drillLvlName, newLevel: drillLvl } = await awardXP(100, uid, xp);
+          celebration = { type: "drill_max", title: "Drill Mastery!", sound: tweaks.sound, xpEarned: 100, didLevelUp: drillLvlUp, newLevelName: drillLvlName, newLevel: drillLvl };
+        }
         break;
       }
 
@@ -501,7 +525,8 @@ export function AppDataProvider({ children }) {
         const newTemplateData = { ...task.skill, recent };
         setTasks(prev => prev.map(t => t.id === action.taskId ? { ...t, skill: newTemplateData } : t));
         if (uid) await updateDoc(doc(db, "users", uid, "tasks", action.taskId), { templateData: newTemplateData });
-        celebration = { type: "session_logged", text: `Logged practice session for ${action.drill || "Skill"}`, sound: tweaks.sound };
+        const { didLevelUp: sessLvlUp, newLevelName: sessLvlName, newLevel: sessLvl } = await awardXP(30, uid, xp);
+        celebration = { type: "session_logged", text: `Logged practice session for ${action.drill || "Skill"}`, sound: tweaks.sound, xpEarned: 30, didLevelUp: sessLvlUp, newLevelName: sessLvlName, newLevel: sessLvl };
         await logEvent({ type: "progress", taskId: action.taskId, title: `Logged Session: ${action.note}`, taskTitle: task.title });
         break;
       }
@@ -535,7 +560,8 @@ export function AppDataProvider({ children }) {
         setTasks(prev => prev.map(t => t.id === action.taskId ? { ...t, book: newTemplateData } : t));
         if (uid) await updateDoc(doc(db, "users", uid, "tasks", action.taskId), { templateData: newTemplateData });
         if (action.status === "done") {
-          celebration = { type: "chapter_done", text: `Finished Chapter: ${chapterTitle}`, sound: tweaks.sound };
+          const { didLevelUp: chLvlUp, newLevelName: chLvlName, newLevel: chLvl } = await awardXP(60, uid, xp);
+          celebration = { type: "chapter_done", text: `Finished Chapter: ${chapterTitle}`, sound: tweaks.sound, xpEarned: 60, didLevelUp: chLvlUp, newLevelName: chLvlName, newLevel: chLvl };
           await logEvent({ type: "progress", taskId: action.taskId, title: `Finished Chapter: ${chapterTitle}`, taskTitle: task.title });
         }
         break;
@@ -658,6 +684,8 @@ export function AppDataProvider({ children }) {
       signIn,
       signUp,
       signOut,
+      xp,
+      level,
       profile,
       saveProfileTraits,
       saveProfilePatterns,
@@ -671,7 +699,7 @@ export function AppDataProvider({ children }) {
       deleteCoachSessions,
       DEFAULT_TRAITS,
     }),
-    [user, loading, tasks, events, currentMood, lastCheckInAt, lastCheckInEnergy, activeTaskId, customMoodTags, tweaks, dailyPlans, profile]
+    [user, loading, tasks, events, currentMood, lastCheckInAt, lastCheckInEnergy, activeTaskId, customMoodTags, tweaks, dailyPlans, profile, xp, level]
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
